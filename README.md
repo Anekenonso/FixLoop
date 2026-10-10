@@ -8,16 +8,18 @@
 
 AI models can now write patches for software bugs, but they often claim "fixed!" when the test is still failing, or quietly edit the test so it passes. **FixLoop** is an autonomous bug-fixing agent with an unbending gatekeeper: it can only submit a pull request if the exact check that failed before now passes cleanly. If it cannot prove the fix within two attempts, it stops and writes down why.
 
+> **Analogy for non-technical viewers:** Think of a student who may only hand in homework after the teacher's own answer key confirms it. If the second attempt fails, the student must hand in a written reason explaining what went wrong instead of guessing.
+
 ### 5-Line Example Run
 ```bash
 git clone https://github.com/Anekenonso/FixLoop && cd FixLoop
 python -m venv .venv && source .venv/bin/activate && pip install -e .
 fixloop run --issue 03 --model openai
-# [Baseline] tests/test_cache.py::test_cache_expiration ... FAILED (Exit 1)
+# [Baseline] tests/test_cache.py::test_compute_failure_contract ... FAILED (Exit 1)
 # [Attempt 1] Patch applied -> verify -> still FAILED. Storing trace span...
 # [Attempt 2] trace_lookup(attempt 1) -> fixed -> verify -> PASSED (Exit 0)
-# [Gatekeeper] Confined to src/ (+3/-1), tests untouched, diff <= 80 lines: APPROVED
-# [Result] PR opened with Trust Receipt (evidence/receipt-03.md). False PR rate: 0.0%
+# [Gatekeeper] Confined to src/ (+1/-1), tests untouched, diff <= 80 lines: APPROVED
+# [Result] PR opened with Trust Receipt. False PR rate: 0.0%
 ```
 
 ### The One Result Table (Empirical Proof)
@@ -28,8 +30,9 @@ fixloop run --issue 03 --model openai
 | **pallets/flask (Issue 4045)** | Real Historical (BSD-3) | 1 trial | **100.0%** (Resolved) | **0.0%** (Gate OK) | $0.001250 USD | [`evidence/replay/receipt-case-01-flask.md`](evidence/replay/receipt-case-01-flask.md) |
 | **psf/requests (Issue 863)** | Real Historical (Apache-2) | 1 trial | **100.0%** (Resolved) | **0.0%** (Gate OK) | $0.002810 USD | [`evidence/replay/receipt-case-02-requests-863.md`](evidence/replay/receipt-case-02-requests-863.md) |
 | **pallets/flask (Issue 4992)** | Real Historical (BSD-3) | 1 trial | **100.0%** (Resolved) | **0.0%** (Gate OK) | $0.001180 USD | [`evidence/replay/receipt-case-03-flask-4992.md`](evidence/replay/receipt-case-03-flask-4992.md) |
+| **Live GitHub PR (fixloop-sandbox)** | Public Repo Fixture | 1 live PR | **100.0%** (Opened) | **0.0%** (Gate OK) | $0.001310 USD | [`evidence/receipt-final-pr.md`](evidence/receipt-final-pr.md) · [PR #1](https://github.com/Anekenonso/fixloop-sandbox/pull/1) |
 
-**Quick Links:** [Live Demo PR #1](https://github.com/Anekenonso/fixloop-sandbox/pull/1) · [Full Architecture](docs/architecture.md) · [Claims Audit](docs/claims-audit.md) · [3-Min Demo Script](docs/demo-script.md) · [Break Matrix (20/20)](docs/break-matrix.md) · [Unit Economics (cfo.ai)](plans/unit-economics.md) · [Roadmap](ROADMAP.md)
+**Quick Links:** [Live Demo PR #1](https://github.com/Anekenonso/fixloop-sandbox/pull/1) · [3-Min Demo Script](docs/demo-script.md) · [Full Architecture](docs/architecture.md) · [Claims Audit](docs/claims-audit.md) · [Break Matrix (20/20)](docs/break-matrix.md) · [Unit Economics (cfo.ai)](plans/unit-economics.md) · [Roadmap](ROADMAP.md)
 
 ---
 
@@ -221,7 +224,19 @@ python -m venv .venv
 pip install -e .
 ```
 
-### Running on a Planted Sandbox Fixture
+### Verifying the Offline Test Suite
+```bash
+# Run all 69 unit tests offline (exit code 0, zero network/API keys required)
+pytest --ignore=tests/test_break_matrix.py -q
+```
+
+### Running with Zero API Keys (Deterministic Fake Model)
+```bash
+# Run FixLoop offline using the deterministic fake model adapter
+python -m src.fixloop run --issue 03 --model fake
+```
+
+### Running on a Planted Sandbox Fixture (Live Model)
 ```bash
 # Run FixLoop on Issue 03 using live model
 python -m src.fixloop run --issue 03 --model openai
