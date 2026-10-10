@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Any, Optional, Tuple, Set
 
-from src.fixloop import gate, model, state, tools
+from src.fixloop import gate, model, state, tools, tracing
 
 MAX_STEPS = 24
 MAX_REJECTIONS = 6
@@ -204,6 +204,9 @@ def run(cfg: Config) -> int:
         print(f"Error: Lock held by another live process for state file {state_path}", file=sys.stderr)
         return 2
 
+    # Initialize observability tracing (Neatlogs)
+    tracing.init_tracing(workflow_name=f"fixloop-{cfg.arm}")
+
     try:
         # Check Break Matrix Row 20: --model fake with headline --out
         if cfg.model == "fake" and cfg.out:
@@ -300,15 +303,23 @@ def run(cfg: Config) -> int:
         s["baseline"] = base
         s["last_span_id"] = base_span_id
 
-        append_span(spans_path, {
-            "span_id": base_span_id,
-            "run_id": run_id,
-            "attempt": 0,
-            "name": "baseline_run",
-            "exit_code": base.get("exit_code"),
-            "tail": base.get("tail", "")[-500:],
-            "duration_s": base.get("duration_s", 0.0),
-        })
+        tracing.log_span(
+            spans_path,
+            span_id=base_span_id,
+            parent_span_id=None,
+            run_id=run_id,
+            attempt=0,
+            name="baseline_run",
+            tool="run_tests_raw",
+            args_redacted={"node_id": s.get("test_node", "")},
+            exit_code=base.get("exit_code"),
+            tail=base.get("tail", ""),
+            diff="",
+            cost_usd=0.0,
+            tokens=0,
+            recovery_of=None,
+            model_id=cfg.model,
+        )
         state.save_state(s, str(state_path))
 
         if base.get("exit_code") == 0:
@@ -440,18 +451,31 @@ def run(cfg: Config) -> int:
             except Exception:
                 pass
 
-            append_span(spans_path, {
-                "span_id": span_id,
-                "run_id": run_id,
-                "attempt": s["attempt"],
-                "tool": action.tool,
-                "name": action.tool,
-                "exit_code": result.get("exit_code"),
-                "tail": result.get("tail", "")[-500:],
-                "diff": diff_text,
-                "cost_usd": action.usage.get("cost_usd", 0.0),
-                "tokens": action.usage.get("tokens", 0),
-            })
+            recovery_of = None
+            if action.tool == "trace_lookup":
+                recovery_of = action.args.get("span_id")
+
+            parent_span_id = base_span_id if s["attempt"] == 1 else (
+                s["runs"][-1]["span_id"] if s["runs"] else base_span_id
+            )
+
+            tracing.log_span(
+                spans_path,
+                span_id=span_id,
+                parent_span_id=parent_span_id,
+                run_id=run_id,
+                attempt=s["attempt"],
+                name=action.tool,
+                tool=action.tool,
+                args_redacted=action.args,
+                exit_code=result.get("exit_code"),
+                tail=result.get("tail", "") if action.tool in {"run_tests", "run_tests_raw"} else "",
+                diff=diff_text,
+                cost_usd=action.usage.get("cost_usd", 0.0),
+                tokens=action.usage.get("tokens", 0),
+                recovery_of=recovery_of,
+                model_id=cfg.model,
+            )
 
             # After-run hooks
             if action.tool == "run_tests":
@@ -483,6 +507,7 @@ def run(cfg: Config) -> int:
                         s["attempt"] += 1
                         s["working"] = []
                         s["pending"]["lookup_done"] = False
+                        tracing.flush_tracing()
                         if s["attempt"] > s["max_attempts"]:
                             if s["flags"]["gate"]:
                                 s["status"] = "stopped"
@@ -536,4 +561,5 @@ def run(cfg: Config) -> int:
             return 1
 
     finally:
+        tracing.shutdown_tracing()
         release_lock(lock)

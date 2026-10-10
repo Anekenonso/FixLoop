@@ -140,3 +140,30 @@ Executed automated acceptance test suite in isolated temporary copy:
     - `test_cli_execution_python_m_fixloop`: confirmed `python -m src.fixloop run --repo <tmp> --issue 03 --model fake` exits 0.
   - Full test suite: `pytest -q` -> 43 passed in 135.35s across all 4 phases.
 - **Status:** **ALL PHASE 4 ACCEPTANCE CHECKS PASSED**
+
+---
+
+## Phase 5 — `tracing.py`, Neatlogs Observability & Spans Ingestion
+
+- **Tracing Implementation (`src/fixloop/tracing.py`):**
+  - Implemented `init_tracing(workflow_name)`: Initializes Neatlogs SDK (`endpoint="https://ingest.neatlogs.com"`) if `NEATLOGS_API_KEY` is present; gracefully falls back to local logging if absent.
+  - Implemented `flush_tracing()`: Flushes pending spans to Neatlogs on attempt transitions.
+  - Implemented `shutdown_tracing()`: Cleanly flushes and shuts down Neatlogs SDK before process termination.
+  - Implemented `redact_args(args)`: Sanitizes sensitive argument keys (`token`, `key`, `secret`, `password`, `auth`, `credential`).
+  - Implemented `log_span(spans_path, ...)`: Records JSONL span with all 14 required fields (Section 3.7):
+    - `span_id, parent_span_id, run_id, attempt, name, tool, args_redacted, exit_code, tail (max 80 lines), diff, cost_usd, tokens, recovery_of, model_id`
+- **Driver Integration (`src/fixloop/driver.py`):**
+  - Wired `tracing.init_tracing(workflow_name=f"fixloop-{cfg.arm}")` at loop start.
+  - Baseline run (Attempt 0) logged with all 14 fields as tool `run_tests_raw`.
+  - Main loop tool calls logged with all 14 fields; tracks `parent_span_id` and records `recovery_of` on `trace_lookup`.
+  - Added `tracing.flush_tracing()` on red run attempt transitions.
+  - Added `tracing.shutdown_tracing()` in driver `finally` block before process lock release.
+- **Acceptance Verification (`tests/test_tracing.py`):**
+  - Command: `pytest tests/test_tracing.py -v -rA` -> 6 passed in 28.65s:
+    - `test_fake_model_spans_schema_and_fields`: Verified `evidence/spans.jsonl` contains all 14 fields with correct types, tail <= 80 lines, and `recovery_of` populated on `trace_lookup`.
+    - `test_spans_written_without_neatlogs_api_key`: Verified driver writes complete spans JSONL even when `NEATLOGS_API_KEY` is unset.
+    - `test_doctor_local_evidence_valid`: Verified `evidence/doctor-local.json` exists with status `"pass"`.
+    - `test_model_sdk_not_imported_at_top_level`: AST check verifies `openai` and `anthropic` are not imported at module top-level before `neatlogs.init`.
+    - `test_redact_sensitive_args`: Verified argument redaction.
+    - `test_tail_truncation_max_80_lines`: Verified tail is capped at 80 lines.
+- **Status:** **ALL PHASE 5 ACCEPTANCE CHECKS PASSED**
