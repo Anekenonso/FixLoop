@@ -1,0 +1,141 @@
+{
+  "run_id": "03-1791653298-43e316",
+  "arm": "full",
+  "issue_id": "03",
+  "issue": {
+    "title": "Dashboards showed stale numbers after the upstream outage, and nobody could tell why",
+    "body": "get_or_compute quietly hands back the previous value when compute fails. There is no trace of the failure anywhere, so we lost hours. Please make this diagnosable."
+  },
+  "test_node": "tests/test_cache.py::test_compute_failure_contract",
+  "repo": "C:\\Users\\USER\\AppData\\Local\\Temp\\fixloop_exp_uh8wofr2",
+  "base_commit": "a78a4041829c1c917bfdc2f0323c1f51f6e2dfb6",
+  "branch": "fixloop/03-1791653298",
+  "attempt": 1,
+  "max_attempts": 2,
+  "runs_used": 1,
+  "timeout_retry_used": false,
+  "status": "passed",
+  "flags": {
+    "gate": true,
+    "lookup": true,
+    "dry_pr": true
+  },
+  "baseline": {
+    "ok": true,
+    "exit_code": 1,
+    "tail": "F                                                                        [100%]\n================================== FAILURES ===================================\nE   Failed: DID NOT RAISE ValueError\nC:\\Users\\USER\\Documents\\Software Development\\AI SaaS\\FixLoop\\sandbox_template\\tests\\test_cache.py:8: Failed: DID NOT RAISE ValueError\n=========================== short test summary info ===========================\nFAILED tests/test_cache.py::test_compute_failure_contract - Failed: DID NOT R...\n1 failed in 0.26s",
+    "duration_s": 1.394,
+    "span_id": "span_base_4fd66772"
+  },
+  "runs": [
+    {
+      "attempt": 1,
+      "command": "pytest tests/test_cache.py::test_compute_failure_contract",
+      "exit_code": 0,
+      "tail": ".                                                                        [100%]\n1 passed in 0.07s",
+      "span_id": "span_run_tests_68ae26d5",
+      "duration_s": 1.219
+    }
+  ],
+  "edits": [
+    {
+      "attempt": 1,
+      "path": "src/cache.py",
+      "ok": true,
+      "span_id": "span_edit_file_4f53b715"
+    }
+  ],
+  "working": [
+    {
+      "tool": "read_issue",
+      "args": {
+        "issue_id": "issue"
+      },
+      "result": {
+        "ok": false,
+        "error": "missing_issue"
+      }
+    },
+    {
+      "tool": "read_file",
+      "args": {
+        "path": "src/cache.py",
+        "start": 1,
+        "end": 60
+      },
+      "result": {
+        "ok": true,
+        "lines": {
+          "1": "_last = None",
+          "2": "",
+          "3": "def get_or_compute(key, compute):",
+          "4": "    global _last",
+          "5": "    try:",
+          "6": "        _last = compute()",
+          "7": "        return _last",
+          "8": "    except Exception:",
+          "9": "        return _last   # BUG: swallows the error silently"
+        }
+      }
+    },
+    {
+      "tool": "edit_file",
+      "args": {
+        "path": "src/cache.py",
+        "old": "    except Exception:\n        return _last   # BUG: swallows the error silently",
+        "new": "    except Exception as e:\n        raise ValueError(f\"compute failed: {e}\") from e"
+      },
+      "result": {
+        "ok": true
+      }
+    },
+    {
+      "tool": "run_tests",
+      "args": {
+        "node_id": "tests/test_cache.py::test_compute_failure_contract"
+      },
+      "result": {
+        "ok": true,
+        "exit_code": 0,
+        "tail": ".                                                                        [100%]\n1 passed in 0.07s",
+        "duration_s": 1.219
+      }
+    },
+    {
+      "tool": "open_pr",
+      "args": {
+        "title": "Fix get_or_compute silently swallowing compute failures",
+        "body": "## Problem\n`get_or_compute` was catching all exceptions and silently returning the last cached value. This caused stale data to appear on dashboards with no indication that the upstream compute had failed.\n\n## Fix\nChanged the `except Exception` clause to re-raise as a `ValueError` with a descriptive message, preserving the original exception as the cause. This makes failures immediately visible and diagnosable.\n\n## Change\n```python\n# Before\nexcept Exception:\n    return _last   # BUG: swallows the error silently\n\n# After\nexcept Exception as e:\n    raise ValueError(f\"compute failed: {e}\") from e\n```\n\nTest `tests/test_cache.py::test_compute_failure_contract` now passes."
+      },
+      "result": {
+        "ok": true,
+        "allowed": true,
+        "pr": "dry_run",
+        "branch": "fixloop/03-1791653298"
+      }
+    }
+  ],
+  "hint": null,
+  "steps": 6,
+  "rejections": 1,
+  "gate_rejects": 0,
+  "gate": null,
+  "pending": {
+    "mismatch": false,
+    "timeout_retry": false,
+    "green": true,
+    "lookup_done": false
+  },
+  "hypotheses_rejected": [],
+  "pr_url": null,
+  "cost_usd": 0.0010040000000000001,
+  "tokens": 5454,
+  "last_span_id": "span_open_pr_69c650c9",
+  "edit_root": "src/",
+  "oracle": {
+    "resolved": true,
+    "node_exit": 0,
+    "file_exit": 0
+  },
+  "false_pr": false
+}

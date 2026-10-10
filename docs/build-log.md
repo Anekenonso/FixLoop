@@ -200,3 +200,43 @@ Executed automated acceptance test suite in isolated temporary copy:
   - Total dollar spend across all 3 live issues: $0.003 USD (well within $0.50 budget cap).
   - Live traces ingested, flushed to Neatlogs, and saved to `evidence/live/spans-*.jsonl` and `evidence/live/state-*.json`.
 - **Status:** **ALL PHASE 6 ACCEPTANCE CHECKS PASSED**
+
+---
+
+## Phase 7 — Experiments & Statistical Rate Table
+
+- **Experiment Engine (`src/fixloop/experiment.py`, `src/fixloop/cli.py`):**
+  - Implemented `run_experiment()` executing matrix of issues, arms, and trials in isolated subprocess sandboxes.
+  - Implemented arm parameter mapping:
+    - `baseline`: `--max-attempts 1 --no-gate --no-trace-lookup` (naive single-shot agent)
+    - `nogate`: `--no-gate` (measures unverified proposal behavior)
+    - `removal`: `--no-trace-lookup` (isolates causal effect of state memory across attempts)
+    - `full`: standard FixLoop with gate and trace memory
+  - Implemented statistical table generator: Computes resolved rate, false PR rate, mean attempts, mean tokens, mean cost, and red->green recoveries.
+  - Implemented `evidence/recovery.json` generator adhering strictly to the section 5 selection rule (first full-arm trial showing red->green, or explicit non-cherry-picked statement if none observed live).
+- **Unit & Offline Testing (`tests/test_experiment.py`):**
+  - Command: `pytest tests/test_experiment.py -v -rA` -> 4 passed:
+    - `test_arm_flag_mapping`: Verifies CLI arguments mapped for each arm.
+    - `test_detect_recovery`: Verifies red->green recovery detection.
+    - `test_generate_summary_table`: Verifies rate table computation.
+    - `test_recovery_selection_fallback`: Verifies non-cherry-picked fallback schema.
+- **Headline Runs (Issue 03 at Temp 0.0):**
+  - Executed reproducible headline runs across all 4 arms:
+    - `evidence/baseline.json` (`baseline` arm): Status `passed`, oracle resolved: `True`, false PR: `False`
+    - `evidence/intervention.json` (`full` arm): Status `passed`, oracle resolved: `True`, false PR: `False`
+    - `evidence/removal.json` (`removal` arm): Status `passed`, oracle resolved: `True`, false PR: `False`
+    - `evidence/nogate.json` (`nogate` arm): Status `passed`, oracle resolved: `True`, false PR: `False`
+  - Documented trace IDs and dashboard URLs in `evidence/trace-links.md`.
+- **Statistical Experiment Matrix (36 Runs at Temp 0.7):**
+  - Command: `python -m src.fixloop experiment --model openai --issues 01 02 03 --arms baseline nogate removal full --trials 3 --temperature 0.7 --total-budget-usd 8.0` -> Exit 0
+  - Completed all 36 runs (3 issues × 4 arms × 3 trials).
+  - Total dollar spend: $0.037 USD (well under $8.00 cap).
+  - Saved individual trial results to `evidence/experiments/<issue>-<arm>-<trial>.json`.
+  - Generated `evidence/experiments/summary.md` and `evidence/experiments/summary.json`.
+  - Generated `evidence/recovery.json` per section 5 selection rule:
+    `{"status": "not_run", "reason": "no full-arm trial showed red->green live (models solved in attempt 1 or halted)"}`
+  - Verified 0% false PR rate across all `full` arm runs.
+- **Full Test Suite Verification:**
+  - Command: `pytest -q` -> 61 passed in 164s (100% pass across all components).
+- **Status:** **ALL PHASE 7 ACCEPTANCE CHECKS PASSED**
+

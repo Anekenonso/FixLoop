@@ -1,0 +1,124 @@
+{
+  "run_id": "02-1791652874-c10975",
+  "arm": "nogate",
+  "issue_id": "02",
+  "issue": {
+    "title": "Config overrides are ignored",
+    "body": "merge(defaults, overrides) keeps the default value when both define a key."
+  },
+  "test_node": "tests/test_merge.py::test_right_wins",
+  "repo": "C:\\Users\\USER\\AppData\\Local\\Temp\\fixloop_exp_u5axx0fq",
+  "base_commit": "99422ef6f1c6cb9d6e0e9441fab88b67423bd14e",
+  "branch": "fixloop/02-1791652874",
+  "attempt": 1,
+  "max_attempts": 2,
+  "runs_used": 1,
+  "timeout_retry_used": false,
+  "status": "passed",
+  "flags": {
+    "gate": false,
+    "lookup": true,
+    "dry_pr": true
+  },
+  "baseline": {
+    "ok": true,
+    "exit_code": 1,
+    "tail": "F                                                                        [100%]\n================================== FAILURES ===================================\nE   AssertionError: assert {'b': 1, 'a': 1} == {'a': 1, 'b': 2}\n      \n      Omitting 1 identical items, use -vv to show\n      Differing items:\n      {'b': 1} != {'b': 2}\n      Use -v to get more diff\nC:\\Users\\USER\\Documents\\Software Development\\AI SaaS\\FixLoop\\sandbox_template\\tests\\test_merge.py:4: AssertionError: assert {'b': 1, 'a': 1} == {'a': 1, 'b': 2}\n=========================== short test summary info ===========================\nFAILED tests/test_merge.py::test_right_wins - AssertionError: assert {'b': 1,...\n1 failed in 0.04s",
+    "duration_s": 1.092,
+    "span_id": "span_base_e2f7bd82"
+  },
+  "runs": [
+    {
+      "attempt": 1,
+      "command": "pytest tests/test_merge.py::test_right_wins",
+      "exit_code": 0,
+      "tail": ".                                                                        [100%]\n1 passed in 0.02s",
+      "span_id": "span_run_tests_c5b57ef3",
+      "duration_s": 1.037
+    }
+  ],
+  "edits": [
+    {
+      "attempt": 1,
+      "path": "src/merge.py",
+      "ok": true,
+      "span_id": "span_edit_file_14062bfc"
+    }
+  ],
+  "working": [
+    {
+      "tool": "read_file",
+      "args": {
+        "path": "src/merge.py",
+        "start": 1,
+        "end": 50
+      },
+      "result": {
+        "ok": true,
+        "lines": {
+          "1": "def merge(left, right):",
+          "2": "    return {**right, **left}  # BUG: left overwrites right; right must win"
+        }
+      }
+    },
+    {
+      "tool": "edit_file",
+      "args": {
+        "path": "src/merge.py",
+        "old": "    return {**right, **left}  # BUG: left overwrites right; right must win",
+        "new": "    return {**left, **right}  # right wins: overrides take precedence"
+      },
+      "result": {
+        "ok": true
+      }
+    },
+    {
+      "tool": "run_tests",
+      "args": {
+        "node_id": "tests/test_merge.py::test_right_wins"
+      },
+      "result": {
+        "ok": true,
+        "exit_code": 0,
+        "tail": ".                                                                        [100%]\n1 passed in 0.02s",
+        "duration_s": 1.037
+      }
+    },
+    {
+      "tool": "open_pr",
+      "args": {
+        "title": "Fix merge() so right-side overrides win over defaults",
+        "body": "## Problem\n`merge(defaults, overrides)` was using `{**right, **left}`, which caused the left (defaults) to overwrite the right (overrides). This meant config overrides were silently ignored.\n\n## Fix\nChanged the unpacking order to `{**left, **right}` so that the right-hand dict (overrides) takes precedence, as expected.\n\n## Test\n`tests/test_merge.py::test_right_wins` now passes."
+      },
+      "result": {
+        "ok": true,
+        "allowed": true,
+        "pr": "dry_run",
+        "branch": "fixloop/02-1791652874"
+      }
+    }
+  ],
+  "hint": null,
+  "steps": 4,
+  "rejections": 0,
+  "gate_rejects": 0,
+  "gate": null,
+  "pending": {
+    "mismatch": false,
+    "timeout_retry": false,
+    "green": true,
+    "lookup_done": false
+  },
+  "hypotheses_rejected": [],
+  "pr_url": null,
+  "cost_usd": 0.0008,
+  "tokens": 4445,
+  "last_span_id": "span_open_pr_bb67696d",
+  "edit_root": "src/",
+  "oracle": {
+    "resolved": true,
+    "node_exit": 0,
+    "file_exit": 0
+  },
+  "false_pr": false
+}

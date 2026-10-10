@@ -1,0 +1,4 @@
+{
+  "status": "not_run",
+  "reason": "no full-arm trial showed red->green live (models solved in attempt 1 or halted)"
+}

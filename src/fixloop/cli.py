@@ -69,7 +69,16 @@ def main(argv: Optional[List[str]] = None) -> int:
         return driver.run(cfg)
 
     elif args.subcommand == "experiment":
-        print("Experiment runner will be executed in Phase 7.")
+        from src.fixloop import experiment
+        exp_cfg = experiment.ExperimentConfig(
+            model=getattr(args, "model", "openai"),
+            issues=getattr(args, "issues", ["01", "02", "03"]),
+            arms=getattr(args, "arms", ["baseline", "nogate", "removal", "full"]),
+            trials=getattr(args, "trials", 5),
+            temperature=getattr(args, "temperature", 0.7),
+            total_budget_usd=getattr(args, "total_budget_usd", 8.0),
+        )
+        experiment.run_experiment(exp_cfg)
         return 0
 
     return 0

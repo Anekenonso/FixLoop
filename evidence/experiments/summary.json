@@ -1,0 +1,146 @@
+{
+  "arms": {
+    "baseline": {
+      "01": {
+        "N": 3,
+        "resolved_count": 3,
+        "resolved_rate": 1.0,
+        "false_pr_count": 0,
+        "false_pr_rate": 0.0,
+        "mean_attempts": 1.0,
+        "mean_tokens": 4431,
+        "mean_cost_usd": 0.000811,
+        "recoveries": 0
+      },
+      "02": {
+        "N": 3,
+        "resolved_count": 3,
+        "resolved_rate": 1.0,
+        "false_pr_count": 0,
+        "false_pr_rate": 0.0,
+        "mean_attempts": 1.0,
+        "mean_tokens": 4453,
+        "mean_cost_usd": 0.000807,
+        "recoveries": 0
+      },
+      "03": {
+        "N": 3,
+        "resolved_count": 3,
+        "resolved_rate": 1.0,
+        "false_pr_count": 0,
+        "false_pr_rate": 0.0,
+        "mean_attempts": 1.0,
+        "mean_tokens": 7263,
+        "mean_cost_usd": 0.001312,
+        "recoveries": 0
+      }
+    },
+    "nogate": {
+      "01": {
+        "N": 3,
+        "resolved_count": 3,
+        "resolved_rate": 1.0,
+        "false_pr_count": 0,
+        "false_pr_rate": 0.0,
+        "mean_attempts": 1.0,
+        "mean_tokens": 5555,
+        "mean_cost_usd": 0.000997,
+        "recoveries": 0
+      },
+      "02": {
+        "N": 3,
+        "resolved_count": 3,
+        "resolved_rate": 1.0,
+        "false_pr_count": 0,
+        "false_pr_rate": 0.0,
+        "mean_attempts": 1.0,
+        "mean_tokens": 5180,
+        "mean_cost_usd": 0.00092,
+        "recoveries": 0
+      },
+      "03": {
+        "N": 3,
+        "resolved_count": 3,
+        "resolved_rate": 1.0,
+        "false_pr_count": 0,
+        "false_pr_rate": 0.0,
+        "mean_attempts": 1.0,
+        "mean_tokens": 7249,
+        "mean_cost_usd": 0.001304,
+        "recoveries": 0
+      }
+    },
+    "removal": {
+      "01": {
+        "N": 3,
+        "resolved_count": 3,
+        "resolved_rate": 1.0,
+        "false_pr_count": 0,
+        "false_pr_rate": 0.0,
+        "mean_attempts": 1.0,
+        "mean_tokens": 5127,
+        "mean_cost_usd": 0.000903,
+        "recoveries": 0
+      },
+      "02": {
+        "N": 3,
+        "resolved_count": 3,
+        "resolved_rate": 1.0,
+        "false_pr_count": 0,
+        "false_pr_rate": 0.0,
+        "mean_attempts": 1.0,
+        "mean_tokens": 5548,
+        "mean_cost_usd": 0.00098,
+        "recoveries": 0
+      },
+      "03": {
+        "N": 3,
+        "resolved_count": 3,
+        "resolved_rate": 1.0,
+        "false_pr_count": 0,
+        "false_pr_rate": 0.0,
+        "mean_attempts": 1.0,
+        "mean_tokens": 7231,
+        "mean_cost_usd": 0.001293,
+        "recoveries": 0
+      }
+    },
+    "full": {
+      "01": {
+        "N": 3,
+        "resolved_count": 3,
+        "resolved_rate": 1.0,
+        "false_pr_count": 0,
+        "false_pr_rate": 0.0,
+        "mean_attempts": 1.0,
+        "mean_tokens": 4740,
+        "mean_cost_usd": 0.000833,
+        "recoveries": 0
+      },
+      "02": {
+        "N": 3,
+        "resolved_count": 3,
+        "resolved_rate": 1.0,
+        "false_pr_count": 0,
+        "false_pr_rate": 0.0,
+        "mean_attempts": 1.0,
+        "mean_tokens": 5544,
+        "mean_cost_usd": 0.000977,
+        "recoveries": 0
+      },
+      "03": {
+        "N": 3,
+        "resolved_count": 3,
+        "resolved_rate": 1.0,
+        "false_pr_count": 0,
+        "false_pr_rate": 0.0,
+        "mean_attempts": 1.0,
+        "mean_tokens": 6664,
+        "mean_cost_usd": 0.001212,
+        "recoveries": 0
+      }
+    }
+  },
+  "comparisons": {},
+  "total_cost_usd": 0.03705
+}

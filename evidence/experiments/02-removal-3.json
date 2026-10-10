@@ -1,0 +1,134 @@
+{
+  "run_id": "02-1791652985-b8b7be",
+  "arm": "removal",
+  "issue_id": "02",
+  "issue": {
+    "title": "Config overrides are ignored",
+    "body": "merge(defaults, overrides) keeps the default value when both define a key."
+  },
+  "test_node": "tests/test_merge.py::test_right_wins",
+  "repo": "C:\\Users\\USER\\AppData\\Local\\Temp\\fixloop_exp_7uena1qv",
+  "base_commit": "1e419a92d1fac1207c92ad27af2eeb769b66cc57",
+  "branch": "fixloop/02-1791652985",
+  "attempt": 1,
+  "max_attempts": 2,
+  "runs_used": 1,
+  "timeout_retry_used": false,
+  "status": "passed",
+  "flags": {
+    "gate": true,
+    "lookup": false,
+    "dry_pr": true
+  },
+  "baseline": {
+    "ok": true,
+    "exit_code": 1,
+    "tail": "F                                                                        [100%]\n================================== FAILURES ===================================\nE   AssertionError: assert {'b': 1, 'a': 1} == {'a': 1, 'b': 2}\n      \n      Omitting 1 identical items, use -vv to show\n      Differing items:\n      {'b': 1} != {'b': 2}\n      Use -v to get more diff\nC:\\Users\\USER\\Documents\\Software Development\\AI SaaS\\FixLoop\\sandbox_template\\tests\\test_merge.py:4: AssertionError: assert {'b': 1, 'a': 1} == {'a': 1, 'b': 2}\n=========================== short test summary info ===========================\nFAILED tests/test_merge.py::test_right_wins - AssertionError: assert {'b': 1,...\n1 failed in 0.05s",
+    "duration_s": 1.365,
+    "span_id": "span_base_024fa614"
+  },
+  "runs": [
+    {
+      "attempt": 1,
+      "command": "pytest tests/test_merge.py::test_right_wins",
+      "exit_code": 0,
+      "tail": ".                                                                        [100%]\n1 passed in 0.03s",
+      "span_id": "span_run_tests_093adc59",
+      "duration_s": 2.205
+    }
+  ],
+  "edits": [
+    {
+      "attempt": 1,
+      "path": "src/merge.py",
+      "ok": true,
+      "span_id": "span_edit_file_87c64479"
+    }
+  ],
+  "working": [
+    {
+      "tool": "read_issue",
+      "args": {
+        "issue_id": "issue"
+      },
+      "result": {
+        "ok": false,
+        "error": "missing_issue"
+      }
+    },
+    {
+      "tool": "read_file",
+      "args": {
+        "path": "src/merge.py",
+        "start": 1,
+        "end": 50
+      },
+      "result": {
+        "ok": true,
+        "lines": {
+          "1": "def merge(left, right):",
+          "2": "    return {**right, **left}  # BUG: left overwrites right; right must win"
+        }
+      }
+    },
+    {
+      "tool": "edit_file",
+      "args": {
+        "path": "src/merge.py",
+        "old": "    return {**right, **left}  # BUG: left overwrites right; right must win",
+        "new": "    return {**left, **right}  # right wins: overrides take precedence"
+      },
+      "result": {
+        "ok": true
+      }
+    },
+    {
+      "tool": "run_tests",
+      "args": {
+        "node_id": "tests/test_merge.py::test_right_wins"
+      },
+      "result": {
+        "ok": true,
+        "exit_code": 0,
+        "tail": ".                                                                        [100%]\n1 passed in 0.03s",
+        "duration_s": 2.205
+      }
+    },
+    {
+      "tool": "open_pr",
+      "args": {
+        "title": "Fix merge() to let right-side overrides win",
+        "body": "## Problem\n`merge(defaults, overrides)` was returning `{**right, **left}`, causing the left (defaults) dict to overwrite the right (overrides) dict when both defined the same key.\n\n## Fix\nChanged the return statement in `src/merge.py` to `{**left, **right}` so that the right-side (overrides) values correctly take precedence over left-side (defaults) values.\n\n## Test\n`tests/test_merge.py::test_right_wins` now passes."
+      },
+      "result": {
+        "ok": true,
+        "allowed": true,
+        "pr": "dry_run",
+        "branch": "fixloop/02-1791652985"
+      }
+    }
+  ],
+  "hint": null,
+  "steps": 5,
+  "rejections": 0,
+  "gate_rejects": 0,
+  "gate": null,
+  "pending": {
+    "mismatch": false,
+    "timeout_retry": false,
+    "green": true,
+    "lookup_done": false
+  },
+  "hypotheses_rejected": [],
+  "pr_url": null,
+  "cost_usd": 0.000983,
+  "tokens": 5554,
+  "last_span_id": "span_open_pr_9a514a25",
+  "edit_root": "src/",
+  "oracle": {
+    "resolved": true,
+    "node_exit": 0,
+    "file_exit": 0
+  },
+  "false_pr": false
+}
