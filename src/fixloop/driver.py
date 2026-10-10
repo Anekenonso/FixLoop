@@ -295,6 +295,7 @@ def run(cfg: Config) -> int:
         state.save_state(s, str(state_path))
 
         spans_path = repo_path / "evidence" / "spans.jsonl"
+        active_model_id = os.environ.get("FIXLOOP_MODEL", cfg.model) if cfg.model != "fake" else "fake"
 
         # 6. Baseline run (Attempt 0)
         base_span_id = f"span_base_{uuid.uuid4().hex[:8]}"
@@ -318,7 +319,7 @@ def run(cfg: Config) -> int:
             cost_usd=0.0,
             tokens=0,
             recovery_of=None,
-            model_id=cfg.model,
+            model_id=active_model_id,
         )
         state.save_state(s, str(state_path))
 
@@ -336,7 +337,7 @@ def run(cfg: Config) -> int:
 
         # 7. Model Adapter initialization
         try:
-            adapter = model.get_adapter(cfg.model, mode=cfg.model_mode)
+            adapter = model.get_adapter(cfg.model, mode=cfg.model_mode, temperature=cfg.temperature)
         except Exception as e:
             print(f"Error initializing model adapter: {e}", file=sys.stderr)
             return 2
@@ -474,7 +475,7 @@ def run(cfg: Config) -> int:
                 cost_usd=action.usage.get("cost_usd", 0.0),
                 tokens=action.usage.get("tokens", 0),
                 recovery_of=recovery_of,
-                model_id=cfg.model,
+                model_id=active_model_id,
             )
 
             # After-run hooks

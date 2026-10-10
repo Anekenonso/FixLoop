@@ -2,6 +2,7 @@ import json
 import os
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Dict, Any, Optional
 
 @dataclass
@@ -26,10 +27,19 @@ def parse_action_response(text: str, usage: Optional[Dict[str, Any]] = None) -> 
         clean = clean[:-3]
     clean = clean.strip()
 
+    parsed = None
     try:
         parsed = json.loads(clean)
-    except Exception as e:
-        raise ModelError(f"invalid_json: {e}")
+    except Exception:
+        start = clean.find("{")
+        end = clean.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            try:
+                parsed = json.loads(clean[start:end + 1])
+            except Exception as e:
+                raise ModelError(f"invalid_json: {e}")
+        else:
+            raise ModelError("invalid_json: no json object found")
 
     if not isinstance(parsed, dict) or "tool" not in parsed or "args" not in parsed:
         raise ModelError("missing_tool_or_args")
@@ -151,23 +161,145 @@ class FakeModelAdapter:
             return Action("run_tests", {"node_id": test_node}, usage={"tokens": 5})
         return Action("open_pr", {"title": "Generic fix", "body": "Generic fix body"}, usage={"tokens": 5})
 
+def get_system_prompt() -> str:
+    """Load system prompt from prompt.txt."""
+    prompt_path = Path(__file__).resolve().parent / "prompt.txt"
+    if prompt_path.is_file():
+        return prompt_path.read_text(encoding="utf-8")
+    return "You are FixLoop, an automated software defect repair agent."
+
+def compute_cost(prompt_tokens: int, completion_tokens: int) -> float:
+    """Compute USD cost from token counts using environment pricing variables.
+    
+    Uses FIXLOOP_PRICE_IN_PER_MTOK and FIXLOOP_PRICE_OUT_PER_MTOK if provided.
+    """
+    price_in_str = os.environ.get("FIXLOOP_PRICE_IN_PER_MTOK")
+    price_out_str = os.environ.get("FIXLOOP_PRICE_OUT_PER_MTOK")
+    if price_in_str and price_out_str:
+        try:
+            price_in = float(price_in_str)
+            price_out = float(price_out_str)
+            return round((prompt_tokens / 1_000_000.0 * price_in) + (completion_tokens / 1_000_000.0 * price_out), 6)
+        except ValueError:
+            pass
+    return 0.0
+
+class OpenAIAdapter:
+    """Live model adapter using OpenAI Chat Completions API with strict JSON formatting."""
+    def __init__(self, api_key: str, model_id: str, temperature: float = 0.0):
+        self.api_key = api_key
+        self.model_id = model_id
+        self.temperature = temperature
+        self.system_prompt = get_system_prompt()
+        import openai
+        base_url = os.environ.get("OPENAI_BASE_URL") or os.environ.get("LITELLM_BASE_URL")
+        if not base_url and os.environ.get("LITELLM_API_KEY"):
+            base_url = "https://litellm.vision.aivar.app/v1"
+
+        if base_url:
+            self.client = openai.OpenAI(api_key=self.api_key, base_url=base_url)
+        else:
+            self.client = openai.OpenAI(api_key=self.api_key)
+
+    def next_action(self, view: Dict[str, Any]) -> Action:
+        user_content = json.dumps(view, indent=2)
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model_id,
+                messages=[
+                    {"role": "system", "content": self.system_prompt},
+                    {"role": "user", "content": user_content},
+                ],
+                temperature=self.temperature,
+                response_format={"type": "json_object"},
+            )
+        except Exception as e:
+            raise ModelError(f"openai_transport_error: {e}")
+
+        choice = response.choices[0]
+        text = choice.message.content or ""
+
+        usage_info = getattr(response, "usage", None)
+        prompt_tokens = getattr(usage_info, "prompt_tokens", 0) if usage_info else 0
+        completion_tokens = getattr(usage_info, "completion_tokens", 0) if usage_info else 0
+        total_tokens = getattr(usage_info, "total_tokens", prompt_tokens + completion_tokens) if usage_info else 0
+
+        cost_usd = compute_cost(prompt_tokens, completion_tokens)
+
+        usage = {
+            "tokens": int(total_tokens),
+            "prompt_tokens": int(prompt_tokens),
+            "completion_tokens": int(completion_tokens),
+            "cost_usd": float(cost_usd),
+        }
+
+        return parse_action_response(text, usage=usage)
+
+class AnthropicAdapter:
+    """Live model adapter using Anthropic Messages API with JSON output parsing."""
+    def __init__(self, api_key: str, model_id: str, temperature: float = 0.0):
+        self.api_key = api_key
+        self.model_id = model_id
+        self.temperature = temperature
+        self.system_prompt = get_system_prompt()
+        import anthropic
+        self.client = anthropic.Anthropic(api_key=self.api_key)
+
+    def next_action(self, view: Dict[str, Any]) -> Action:
+        user_content = json.dumps(view, indent=2)
+        try:
+            response = self.client.messages.create(
+                model=self.model_id,
+                system=self.system_prompt,
+                messages=[{"role": "user", "content": user_content}],
+                temperature=self.temperature,
+                max_tokens=2048,
+            )
+        except Exception as e:
+            raise ModelError(f"anthropic_transport_error: {e}")
+
+        text = ""
+        for block in getattr(response, "content", []):
+            if getattr(block, "type", "") == "text":
+                text += getattr(block, "text", "")
+
+        usage_info = getattr(response, "usage", None)
+        prompt_tokens = getattr(usage_info, "input_tokens", 0) if usage_info else 0
+        completion_tokens = getattr(usage_info, "output_tokens", 0) if usage_info else 0
+        total_tokens = prompt_tokens + completion_tokens
+        cost_usd = compute_cost(prompt_tokens, completion_tokens)
+
+        usage = {
+            "tokens": int(total_tokens),
+            "prompt_tokens": int(prompt_tokens),
+            "completion_tokens": int(completion_tokens),
+            "cost_usd": float(cost_usd),
+        }
+
+        return parse_action_response(text, usage=usage)
+
 def get_adapter(model_name: str, **kwargs) -> Any:
     """Factory to get the appropriate model adapter."""
+    temperature = kwargs.get("temperature", 0.0)
     if model_name == "fake":
         mode = kwargs.get("mode")
         return FakeModelAdapter(mode=mode)
     elif model_name == "openai":
-        api_key = os.environ.get("OPENAI_API_KEY")
+        api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("LITELLM_API_KEY")
         model_id = os.environ.get("FIXLOOP_MODEL")
-        if not api_key or not model_id:
-            raise ValueError("OPENAI_API_KEY and FIXLOOP_MODEL must be set for --model openai")
-        # OpenAI adapter will be fully wired in Phase 6
-        raise NotImplementedError("OpenAI adapter will be wired in Phase 6")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY or LITELLM_API_KEY must be set in environment for --model openai")
+        if not model_id:
+            raise ValueError("FIXLOOP_MODEL must be set in environment for --model openai")
+        return OpenAIAdapter(api_key=api_key, model_id=model_id, temperature=temperature)
     elif model_name == "anthropic":
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         model_id = os.environ.get("FIXLOOP_MODEL")
-        if not api_key or not model_id:
-            raise ValueError("ANTHROPIC_API_KEY and FIXLOOP_MODEL must be set for --model anthropic")
-        raise NotImplementedError("Anthropic adapter will be wired in Phase 6")
+        if not api_key:
+            raise ValueError("ANTHROPIC_API_KEY must be set in environment for --model anthropic")
+        if not model_id:
+            raise ValueError("FIXLOOP_MODEL must be set in environment for --model anthropic")
+        return AnthropicAdapter(api_key=api_key, model_id=model_id, temperature=temperature)
     else:
         raise ValueError(f"Unknown model provider: {model_name}")
+

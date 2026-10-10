@@ -167,3 +167,36 @@ Executed automated acceptance test suite in isolated temporary copy:
     - `test_redact_sensitive_args`: Verified argument redaction.
     - `test_tail_truncation_max_80_lines`: Verified tail is capped at 80 lines.
 - **Status:** **ALL PHASE 5 ACCEPTANCE CHECKS PASSED**
+
+---
+
+## Phase 6 — Live Model Adapter, Cost Accounting & Live Verification Runs
+
+- **Model Adapters (`src/fixloop/model.py`):**
+  - Implemented `OpenAIAdapter`: Uses OpenAI Chat Completions API with strict JSON formatting (`response_format={"type": "json_object"}`), configurable `temperature`, and base URL support (`OPENAI_BASE_URL` pointing to LiteLLM sponsored proxy `https://litellm.vision.aivar.app/v1`).
+  - Implemented `AnthropicAdapter`: Alternative provider using Anthropic Messages API.
+  - Implemented `compute_cost`: Reads `FIXLOOP_PRICE_IN_PER_MTOK` and `FIXLOOP_PRICE_OUT_PER_MTOK` from environment to compute exact USD costs per call.
+  - Robust JSON parsing in `parse_action_response`: Strips markdown fences, parses direct JSON, and safely extracts JSON objects if model prepends conversational text.
+  - Lazy SDK import inside adapter initialization: Preserves import ordering guarantee where `neatlogs.init` executes before model SDK load.
+- **Unit & Offline Testing (`tests/test_model.py`):**
+  - Command: `pytest tests/test_model.py -v -rA` -> 8 passed:
+    - JSON parser, markdown fence stripping, invalid JSON / missing keys error handling.
+    - Cost computation with and without pricing environment variables.
+    - Missing credentials error handling (exit 2 compliance).
+    - Mocked OpenAI Chat Completion test verifying token counting and cost attribution.
+    - Transport error propagation as `ModelError`.
+- **Live Acceptance Runs (`evidence/live/`):**
+  - Tested on `claude-sonnet-4.6` via the sponsored hackathon LiteLLM proxy:
+    - **Issue 01 (Paginate):**
+      - Exit code: 0, status: `passed`, attempts: 1, tokens: 4,330, cost: $0.00075 USD
+      - Oracle resolved: `True`, False PR: `False`
+    - **Issue 02 (Merge):**
+      - Exit code: 0, status: `passed`, attempts: 1, tokens: 5,552, cost: $0.00098 USD
+      - Oracle resolved: `True`, False PR: `False`
+    - **Issue 03 (Cache):**
+      - Exit code: 0, status: `passed`, attempts: 1, tokens: 7,284, cost: $0.00132 USD
+      - Oracle resolved: `True`, False PR: `False`
+  - Total token spend across all 3 live issues: 17,166 tokens (< 15% of single-run cap of 120,000).
+  - Total dollar spend across all 3 live issues: $0.003 USD (well within $0.50 budget cap).
+  - Live traces ingested, flushed to Neatlogs, and saved to `evidence/live/spans-*.jsonl` and `evidence/live/state-*.json`.
+- **Status:** **ALL PHASE 6 ACCEPTANCE CHECKS PASSED**
