@@ -582,9 +582,9 @@ def run(cfg: Config) -> int:
             receipt_file.parent.mkdir(parents=True, exist_ok=True)
             receipt_file.write_text(receipt_text, encoding="utf-8")
 
-            # Also mirror to workspace evidence/
+            # Also mirror to workspace evidence/ if live model run
             root_evidence = Path("evidence").resolve()
-            if root_evidence.is_dir() and root_evidence != receipt_file.parent.resolve():
+            if cfg.model != "fake" and root_evidence.is_dir() and root_evidence != receipt_file.parent.resolve():
                 (root_evidence / f"receipt-{s['run_id']}.md").write_text(receipt_text, encoding="utf-8")
         except Exception as e:
             print(f"Warning: Failed to write trust receipt: {e}", file=sys.stderr)

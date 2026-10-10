@@ -186,6 +186,7 @@ def edit_file(
     attempt = state.get("attempt", 1)
     test_node = state.get("test_node", "")
     commit_msg = f"fixloop attempt {attempt}: {test_node}"
+    norm_target = str(target.relative_to(repo_path)).replace("\\", "/")
     
     try:
         subprocess.run(["git", "add", norm_target], cwd=str(repo_path), check=True, capture_output=True)
