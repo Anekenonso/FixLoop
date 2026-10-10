@@ -98,3 +98,45 @@ Executed automated acceptance test suite in isolated temporary copy:
     - Row 17: Test hangs (timeout) -> exit code 124
     - Exact argv assertion: verified `[sys.executable, "-m", "pytest", node_id, "-q", "--tb=line"]` via monkeypatched `subprocess.run`.
 - **Status:** **ALL PHASE 3 ACCEPTANCE CHECKS PASSED**
+
+---
+
+## Phase 4 — `driver.py`, `cli.py`, `fake` Model Adapter & Tests
+
+- **System Prompt (`src/fixloop/prompt.txt`):**
+  - Concise prompt (< 600 words) defining the six tools, JSON schema, authority boundaries, untrusted data handling, confinement under `src/`, 2 verifying run limit, and mandatory `trace_lookup` on attempts >= 2.
+- **Model Adapter & Fake Simulator (`src/fixloop/model.py`):**
+  - `Action` dataclass (`tool`, `args`, `usage`) and `ModelError`.
+  - `parse_action_response`: Strict JSON parsing with markdown code-fence stripping.
+  - `FakeModelAdapter`: Purely view-driven simulation without hidden counters.
+    - Issue 01: Off-by-one fix in 1 attempt.
+    - Issue 02: Dict merge precedence fix in 1 attempt.
+    - Issue 03: Attempt 1 naive comment-only edit (fails). Attempt 2 with pointer inspects trace via `trace_lookup`, applies `raise` patch, passes, and opens PR. Attempt 2 without pointer (removal arm) repeats attempt 1 edit, mismatches, and halts.
+    - Error injection modes (`unknown_tool`, `invalid_json`, `junk_loop`) for break-matrix validation.
+  - `get_adapter`: Factory supporting `fake`, `openai`, `anthropic`.
+- **Authoritative Driver Loop (`src/fixloop/driver.py`):**
+  - PID-based atomic locking (`.fixloop/state.lock`) verifying process liveness via Windows API / POSIX signals; cleanly replaces stale locks from dead processes.
+  - Enforces clean repository check at start (`git status --porcelain`).
+  - Baseline verification run (Attempt 0) logged to spans before model actions.
+  - Step budget (max 24) and rejection budget (max 6) enforcement.
+  - Enforces `allowed_tools` state machine:
+    - On `mismatch` -> forced `read_file`
+    - On `timeout_retry` -> forced `run_tests`
+    - On `green` -> forced `open_pr`
+    - On `attempt >= 2` with lookup enabled -> forced `trace_lookup` until called
+  - Local span generation append-only to `evidence/spans.jsonl`.
+  - Independent post-run `oracle` execution verifying target test node and test suite pass on final tree; computes authoritative `false_pr` metric.
+  - Standard exit codes: 0 (`passed`/`pr_opened`), 1 (`stopped`), 2 (config/lock/dirty repo error), 3 (`proposed_ungated`).
+- **CLI & Packaging (`src/fixloop/cli.py`, `src/fixloop/__main__.py`, `pyproject.toml`):**
+  - Configured `python -m fixloop run` with all flags (`--repo`, `--issue`, `--model`, `--arm`, `--no-gate`, `--no-trace-lookup`, `--pr`, etc.).
+  - Configured `pyproject.toml` with dependencies, Python `>=3.10,<3.14`, and `prompt.txt` package data.
+- **Acceptance Verification (`tests/test_driver_fake_model.py`):**
+  - Command: `pytest tests/test_driver_fake_model.py -v -rA` -> 12 passed in 169.84s
+    - `test_driver_issue03_full_arm`: red -> comment patch -> red -> `trace_lookup` -> re-raise -> green -> gate ok -> `passed`, oracle resolved, `false_pr` false.
+    - `test_driver_issue03_removal_arm`: `--no-trace-lookup` attempt 2 halted -> `stopped`, stop file generated, oracle unresolved.
+    - `test_driver_issue03_baseline_ungated_arm`: `--no-gate --max-attempts 1` ends `proposed_ungated`, oracle unresolved, `false_pr` true (proves false PR detection metric).
+    - `test_driver_issue01_full_arm` & `test_driver_issue02_full_arm`: both pass in 1 attempt.
+    - Security / resilience cases passed: unknown tool, invalid JSON, junk loop, lock held (exit 2), stale lock recovery (exit 0), dirty repo at start (exit 2), missing `TEST_NODE` (exit 1).
+    - `test_cli_execution_python_m_fixloop`: confirmed `python -m src.fixloop run --repo <tmp> --issue 03 --model fake` exits 0.
+  - Full test suite: `pytest -q` -> 43 passed in 135.35s across all 4 phases.
+- **Status:** **ALL PHASE 4 ACCEPTANCE CHECKS PASSED**
