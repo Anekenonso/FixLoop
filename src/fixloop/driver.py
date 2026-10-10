@@ -32,6 +32,10 @@ class Config:
     state: str = ".fixloop/state.json"
     out: Optional[str] = None
     model_mode: Optional[str] = None
+    issue_file: Optional[str] = None
+    test: Optional[str] = None
+    edit_root: str = "src/"
+
 
 def is_pid_alive(pid: int) -> bool:
     """Check if process with given PID is alive."""
@@ -228,8 +232,14 @@ def run(cfg: Config) -> int:
             return 2
 
         # 3. Read issue (Break Matrix Row 1)
-        issue_res = tools.read_issue(str(repo_path), cfg.issue)
+        issue_res = tools.read_issue(
+            str(repo_path),
+            cfg.issue,
+            issue_file=cfg.issue_file,
+            test_override=cfg.test
+        )
         run_id = f"{cfg.issue}-{int(time.time())}-{uuid.uuid4().hex[:6]}"
+
 
         if not issue_res.get("ok"):
             # Break Matrix Row 1: issue missing or malformed -> stop, no edit, exit 1
@@ -291,8 +301,10 @@ def run(cfg: Config) -> int:
                 "lookup": cfg.lookup,
                 "dry_pr": cfg.dry_pr,
             },
+            "edit_root": cfg.edit_root,
         })
         state.save_state(s, str(state_path))
+
 
         spans_path = repo_path / "evidence" / "spans.jsonl"
         active_model_id = os.environ.get("FIXLOOP_MODEL", cfg.model) if cfg.model != "fake" else "fake"
@@ -549,6 +561,34 @@ def run(cfg: Config) -> int:
             out_path = Path(cfg.out).resolve()
             out_path.parent.mkdir(parents=True, exist_ok=True)
             out_path.write_text(json.dumps(s, indent=2), encoding="utf-8")
+
+        # 10b. Generate and write Trust Receipt (W1)
+        try:
+            from src.fixloop import receipt
+            final_diff = ""
+            try:
+                diff_res = subprocess.run(
+                    ["git", "diff", s.get("base_commit", "HEAD")],
+                    cwd=str(repo_path),
+                    capture_output=True,
+                    text=True
+                )
+                final_diff = diff_res.stdout or ""
+            except Exception:
+                pass
+
+            receipt_text = receipt.generate_receipt(s, diff_text=final_diff)
+            receipt_file = Path(repo_path) / "evidence" / f"receipt-{s['run_id']}.md"
+            receipt_file.parent.mkdir(parents=True, exist_ok=True)
+            receipt_file.write_text(receipt_text, encoding="utf-8")
+
+            # Also mirror to workspace evidence/
+            root_evidence = Path("evidence").resolve()
+            if root_evidence.is_dir() and root_evidence != receipt_file.parent.resolve():
+                (root_evidence / f"receipt-{s['run_id']}.md").write_text(receipt_text, encoding="utf-8")
+        except Exception as e:
+            print(f"Warning: Failed to write trust receipt: {e}", file=sys.stderr)
+
 
         # 11. Final output and exit code
         print(f"State saved to {state_path}")

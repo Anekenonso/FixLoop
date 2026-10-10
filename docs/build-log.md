@@ -296,5 +296,37 @@ Executed automated acceptance test suite in isolated temporary copy:
   - Provided cfo.ai inputs mapping for hackathon judging requirements.
 - **Status:** **ALL PHASE 9 ACCEPTANCE CHECKS PASSED**
 
+---
 
+## Winning Layer W1 & W3 — Trust Receipts & Generic CLI
 
+- **Trust Receipt Generator (`src/fixloop/receipt.py`):**
+  - Implemented 100% code-generated receipt formatting directly from state dictionary and diff statistics (no model hallucination or prose).
+  - Receipt includes: Issue Title, Verdict (`FIXED, gate ok` or `NOT FIXED: <reason>`), Baseline Check (node and exit code), Fresh Gate Verification Check, Files Changed, Lines Modified (+/-), Tests & Config Unchanged (`yes` / `no`), Attempts, Tokens, Measured Cost, and Neatlogs Trace link.
+  - Tested in `tests/test_receipt.py` (3 passed).
+  - Integrated into `driver.py` (saves `evidence/receipt-<run_id>.md`) and `tools.py` (embeds receipt in PR body).
+  - Emitted headline receipts: `evidence/receipt-baseline.md`, `evidence/receipt-intervention.md`, `evidence/receipt-removal.md`, `evidence/receipt-nogate.md`.
+- **Generic CLI & Repository Confinement (W3):**
+  - Updated `src/fixloop/cli.py` and `tools.py` with generic repository flags: `--issue-file`, `--test`, and `--edit-root`.
+  - Generalized `TEST_NODE_REGEX` to accept arbitrary repo-relative test nodes matching `^[A-Za-z0-9_./-]+\.py::[A-Za-z0-9_]+$`.
+  - Directory confinement enforces edits strictly inside `--edit-root` (e.g. `src/`) and protects all files outside it.
+  - Tested in `tests/test_generic_cli.py` (2 passed).
+
+---
+
+## Winning Layer W2 — Three Real Historical Bug Replay Cases
+
+- **Case Selection & Pre-Registration (`docs/replay-cases.md`):**
+  - Selected 3 historical SWE-bench Lite bugs from established open-source Python repositories:
+    1. **`pallets/flask` (Issue 4045, BSD-3-Clause):** Blueprint name containing dots raises `ValueError`. Target: `tests/test_blueprints.py::test_dotted_name_not_allowed`.
+    2. **`psf/requests` (Issue 863, Apache-2.0):** Allow lists in dict values of hooks argument. Target: `tests/test_requests.py::test_allow_list_of_hooks_to_register_hook`.
+    3. **`pallets/flask` (Issue 4992, BSD-3-Clause):** Add `text` file mode parameter to `flask.Config.from_file()` for binary loaders like `tomllib.load`. Target: `tests/test_config.py::test_config_from_file_toml`.
+  - Documented selection rationale, licenses, issue URLs, and commit SHAs in `docs/replay-cases.md`.
+- **Offline Feasibility Verification (Zero Model):**
+  - Verified feasibility of all 3 cases offline:
+    - Base commit exit code: `1` (fails the named node cleanly).
+    - Fixed commit exit code: `0` (passes the named node cleanly).
+    - Clean base state restored.
+  - All 3 cases pass feasibility checks 100%.
+- **Pre-Registration Discipline:**
+  - `docs/replay-cases.md` must be committed to git before any live model execution on the replay cases.

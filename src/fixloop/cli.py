@@ -28,8 +28,11 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--state", default=".fixloop/state.json", help="Path to state file")
     run_parser.add_argument("--out", default=None, help="Path to write run summary JSON")
     run_parser.add_argument("--model-mode", default=None, help="Internal test mode for fake model")
+    run_parser.add_argument("--issue-file", default=None, help="Path to custom issue file")
+    run_parser.add_argument("--test", default=None, help="Test node override (e.g. tests/test_foo.py::test_bar)")
+    run_parser.add_argument("--edit-root", default="src/", help="Directory where edits are confined (default: src/)")
 
-    # Command: experiment (stub for Phase 7)
+    # Command: experiment
     exp_parser = subparsers.add_parser("experiment", help="Run benchmark experiments")
     exp_parser.add_argument("--model", choices=["fake", "openai", "anthropic"], default="openai")
     exp_parser.add_argument("--issues", nargs="+", default=["01", "02", "03"])
@@ -65,8 +68,12 @@ def main(argv: Optional[List[str]] = None) -> int:
             state=state_val,
             out=getattr(args, "out", None),
             model_mode=getattr(args, "model_mode", None),
+            issue_file=getattr(args, "issue_file", None),
+            test=getattr(args, "test", None),
+            edit_root=getattr(args, "edit_root", "src/"),
         )
         return driver.run(cfg)
+
 
     elif args.subcommand == "experiment":
         from src.fixloop import experiment

@@ -10,35 +10,48 @@ from typing import Dict, Any, Optional, Tuple, Callable
 
 from src.fixloop import gate
 
-TEST_NODE_REGEX = re.compile(r"^tests/[A-Za-z0-9_/]+\.py::[A-Za-z0-9_]+$")
-ISSUE_NODE_LINE = re.compile(r"^TEST_NODE:\s*(tests/[A-Za-z0-9_/]+\.py::[A-Za-z0-9_]+)\s*$", re.MULTILINE)
+TEST_NODE_REGEX = re.compile(r"^[A-Za-z0-9_./-]+\.py::[A-Za-z0-9_]+$")
+ISSUE_NODE_LINE = re.compile(r"^TEST_NODE:\s*([A-Za-z0-9_./-]+\.py::[A-Za-z0-9_]+)\s*$", re.MULTILINE)
 SKIP_PATTERN = re.compile(r"\b(pytest\.skip|importorskip|xfail|skipif|mark\.skip)\b")
 
-def read_issue(repo: str, issue_id: str) -> Dict[str, Any]:
+def read_issue(
+    repo: str,
+    issue_id: str,
+    issue_file: Optional[str] = None,
+    test_override: Optional[str] = None
+) -> Dict[str, Any]:
     """Read and parse an issue file.
     
     Expects `# title`, body, and `TEST_NODE: tests/...::...`.
+    If issue_file is provided, reads that path directly.
+    If test_override is provided, uses it as the target test node.
     """
     repo_path = Path(repo).resolve()
     
-    # Support issue_id as '01', '01-paginate', or full file path
-    candidates = [
-        repo_path / f"issues/{issue_id}.md",
-        repo_path / f"issues/{issue_id}",
-        repo_path / issue_id,
-        repo_path / f"sandbox_template/issues/{issue_id}.md",
-    ]
-    
-    # Also search by prefix in issues/
-    issues_dir = repo_path / "issues"
-    if not any(c.is_file() for c in candidates) and issues_dir.is_dir():
-        for f in issues_dir.glob(f"{issue_id}*.md"):
-            candidates.insert(0, f)
-            break
+    if issue_file:
+        p = Path(issue_file)
+        target_file = p if p.is_file() else (repo_path / issue_file)
+        if not target_file.is_file():
+            return {"ok": False, "error": "missing_issue"}
+    else:
+        # Support issue_id as '01', '01-paginate', or full file path
+        candidates = [
+            repo_path / f"issues/{issue_id}.md",
+            repo_path / f"issues/{issue_id}",
+            repo_path / issue_id,
+            repo_path / f"sandbox_template/issues/{issue_id}.md",
+        ]
+        
+        # Also search by prefix in issues/
+        issues_dir = repo_path / "issues"
+        if not any(c.is_file() for c in candidates) and issues_dir.is_dir():
+            for f in issues_dir.glob(f"{issue_id}*.md"):
+                candidates.insert(0, f)
+                break
 
-    target_file = next((c for c in candidates if c.is_file()), None)
-    if not target_file:
-        return {"ok": False, "error": "missing_issue"}
+        target_file = next((c for c in candidates if c.is_file()), None)
+        if not target_file:
+            return {"ok": False, "error": "missing_issue"}
 
     try:
         content = target_file.read_text(encoding="utf-8")
@@ -52,11 +65,16 @@ def read_issue(repo: str, issue_id: str) -> Dict[str, Any]:
             title = line[2:].strip()
             break
 
-    node_match = ISSUE_NODE_LINE.search(content)
-    if not node_match or not title:
-        return {"ok": False, "error": "malformed_issue"}
+    if test_override:
+        if not TEST_NODE_REGEX.match(test_override.strip()):
+            return {"ok": False, "error": "invalid_node_id"}
+        test_node = test_override.strip()
+    else:
+        node_match = ISSUE_NODE_LINE.search(content)
+        if not node_match or not title:
+            return {"ok": False, "error": "malformed_issue"}
+        test_node = node_match.group(1).strip()
 
-    test_node = node_match.group(1).strip()
     
     # Body is everything between title and TEST_NODE
     body_lines = []
@@ -342,6 +360,10 @@ def open_pr(
         return {"ok": False, "allowed": False, "reason": gate_result.get("reason")}
 
     # Gate allowed -> check if live PR or dry run
+    from src.fixloop import receipt
+    receipt_body = receipt.generate_receipt(state, diff_text=diff_text)
+    full_body = f"{receipt_body}\n\n## Model Notes\n{body}" if body else receipt_body
+
     flags = state.get("flags", {})
     if flags.get("dry_pr", True):
         # Dry run: record body to evidence
@@ -349,7 +371,7 @@ def open_pr(
         evidence_dir = repo_path / "evidence"
         evidence_dir.mkdir(parents=True, exist_ok=True)
         pr_body_file = evidence_dir / f"pr-body-{run_id}.md"
-        pr_body_file.write_text(f"# {title}\n\n{body}", encoding="utf-8")
+        pr_body_file.write_text(f"# {title}\n\n{full_body}", encoding="utf-8")
         return {
             "ok": True,
             "allowed": True,
@@ -365,7 +387,7 @@ def open_pr(
             capture_output=True,
             text=True
         )
-        gh_cmd = ["gh", "pr", "create", "--title", title, "--body", body]
+        gh_cmd = ["gh", "pr", "create", "--title", title, "--body", full_body]
         gh_res = subprocess.run(
             gh_cmd,
             cwd=str(repo_path),
@@ -377,3 +399,4 @@ def open_pr(
         return {"ok": True, "allowed": True, "pr": "opened", "url": pr_url}
     except Exception as e:
         return {"ok": False, "error": f"gh_error: {e}"}
+

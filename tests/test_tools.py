@@ -406,4 +406,7 @@ def test_open_pr_length_limits_and_dry_run(sandbox_repo):
     # Check evidence pr body file was written
     pr_body_file = sandbox_repo / "evidence" / "pr-body-test_run_1.md"
     assert pr_body_file.is_file()
-    assert "# Fix paginate\n\nFixed off by one" in pr_body_file.read_text(encoding="utf-8")
+    pr_text = pr_body_file.read_text(encoding="utf-8")
+    assert "# Fix paginate" in pr_text
+    assert "FixLoop Trust Receipt" in pr_text
+    assert "Fixed off by one" in pr_text
