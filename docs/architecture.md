@@ -26,7 +26,7 @@ sequenceDiagram
     participant Gate as Gatekeeper Inspector
     participant Neatlogs as Neatlogs Telemetry
 
-    Dev->>Driver: fixloop run --issue <id>
+    Dev->>Driver: fixloop run --issue ISSUE_ID
     Driver->>Tools: run_tests(target_node)
     Tools-->>Driver: Baseline Failed (Exit 1)
     Driver->>Neatlogs: Emit span_base
@@ -38,7 +38,7 @@ sequenceDiagram
         Tools-->>Driver: Result + Diff Update
         Driver->>Neatlogs: Emit 14-field span
         
-        alt Attempt > 1 and lookup needed
+        alt Attempt 2 and lookup needed
             Model->>Tools: trace_lookup(run_id)
             Tools->>Neatlogs: Fetch prior failed spans
             Tools-->>Model: Return failure context & diff
@@ -48,14 +48,14 @@ sequenceDiagram
     Model->>Tools: open_pr(title, body)
     Tools->>Gate: evaluate(state, diff_text, verify())
     
-    alt Gate Rejection (Tests modified, node red, diff > 80 lines)
+    alt Gate Rejection (Tests modified, node red, diff &gt; 80 lines)
         Gate-->>Driver: Rejected (reason)
         Driver->>Driver: Increment gate_rejects
         Driver->>Driver: Write stop file (NOT FIXED)
     else Gate Approval (Node green, diff confined, tests untouched)
         Gate-->>Driver: Approved
         Driver->>Tools: git checkout -b branch && gh pr create
-        Driver->>Driver: Emit Trust Receipt (evidence/receipt-<id>.md)
+        Driver->>Driver: Emit Trust Receipt (evidence/receipt-RUN_ID.md)
     end
 ```
 

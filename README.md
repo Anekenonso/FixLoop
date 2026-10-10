@@ -64,36 +64,45 @@ FixLoop operates as a single-process state machine without complex agent framewo
 
 ```mermaid
 flowchart TD
-    Issue[Issue Report + TEST_NODE] --> Base[Run Baseline Test]
-    Base -->|Exit 1: Confirmed Failing| Loop{Attempt 1..2}
+    Issue["Issue Report + Target Test Node"] --> Base["Run Baseline Test"]
+    Base -->|"Exit 1: Confirmed Red"| Loop{"Attempt 1 or 2"}
     
-    subgraph Six Atomic Tools
-        T1[read_issue]
-        T2[read_file]
-        T3[edit_file - Confined to edit-root]
-        T4[run_tests - Sanitized Subprocess]
-        T5[trace_lookup - Causal Span Memory]
-        T6[open_pr]
+    subgraph Tools["Six Atomic Tools"]
+        T1["read_issue"]
+        T2["read_file"]
+        T3["edit_file (Confined to edit-root)"]
+        T4["run_tests (Sanitized Subprocess)"]
+        T5["trace_lookup (Neatlogs Span Memory)"]
+        T6["open_pr"]
     end
     
-    Loop --> T1 & T2 & T3 & T4
-    Loop -->|Attempt 2 Failure Context| T5
-    T3 --> GitCommit[Auto Git Commit to Branch]
-    T6 --> Gatekeeper{Gatekeeper Evaluation}
+    Loop --> T1
+    Loop --> T2
+    Loop --> T3
+    Loop --> T4
+    Loop -->|"Attempt 2 Context"| T5
     
-    subgraph Invariant Hierarchy
-        G1[1. Exact Node Must Exit 0]
-        G2[2. Parent Test File Must Exit 0]
-        G3[3. Changes Confined to edit-root]
-        G4[4. Diff Total <= 80 Lines]
-        G5[5. Zero Asserts Deleted]
-        G6[6. Zero Skips Injected]
+    T3 --> GitCommit["Auto Git Commit to Branch"]
+    T6 --> Gatekeeper{"Gatekeeper Evaluation"}
+    
+    subgraph Invariants["Deterministic Gate Invariants"]
+        G1["1. Exact Node Exits 0"]
+        G2["2. Parent Test File Exits 0"]
+        G3["3. Changes Confined to edit-root"]
+        G4["4. Diff Total &le; 80 Lines"]
+        G5["5. Zero Asserts Deleted"]
+        G6["6. Zero Skips Injected"]
     end
     
-    Gatekeeper --> G1 --> G2 --> G3 --> G4 --> G5 --> G6
+    Gatekeeper --> G1
+    G1 --> G2
+    G2 --> G3
+    G3 --> G4
+    G4 --> G5
+    G5 --> G6
     
-    G6 -->|Passes All 6 Invariants| PR[Open PR + Emit Trust Receipt]
-    Gatekeeper -->|Fails Any Invariant| Stop[Halt: Written Stop Reason]
+    G6 -->|"Passes All Invariants"| PR["Open PR + Emit Trust Receipt"]
+    Gatekeeper -->|"Fails Any Invariant"| Stop["Halt: Written Stop Reason"]
 ```
 
 ### The State File (`.fixloop/state.json`)
