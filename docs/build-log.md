@@ -45,3 +45,29 @@ Executed automated acceptance test suite in isolated temporary copy:
 - Obvious fixes applied:
   - All test files exit 0 (100% target and guard pass)
 - **Status:** **ALL PHASE 1 ACCEPTANCE CHECKS PASSED**
+
+---
+
+## Phase 2 — `state.py`, `gate.py` + tests
+
+- **State Management (`src/fixloop/state.py`):**
+  - Canonical state data structure initialized with default fields.
+  - Atomic persistence implemented via temporary file + `os.replace`.
+  - Stateless projection engine implemented (`project_state`): strips attempt 1 failure details/diffs on attempt 2, leaving only pointer `span_id` when lookup is enabled.
+- **Pure Code Gatekeeper (`src/fixloop/gate.py`):**
+  - Robust unified diff parser (`parse_diff`) preventing regex evasion.
+  - Strict priority order evaluation:
+    1. `no_prior_red_run` (must be real failure, not 0 or 124 timeout)
+    2. `empty_diff` (empty text or no changes)
+    3. `protected_path_touched` (confinement to `src/` or configured `--edit-root`)
+    4. `assert_deleted` (deleting asserts strictly prohibited)
+    5. `test_skipped` (adding `pytest.skip`, `xfail`, etc. strictly prohibited)
+    6. `diff_too_large` (added + removed > 80 lines)
+    7. `node_not_green` (target test node must exit 0)
+    8. `file_not_green` (full test file must exit 0 regression guard)
+    9. `allowed: True, reason: "ok"`
+- **Acceptance Verification:**
+  - Command: `pytest -q -rA tests/test_gate.py` -> 14 passed in 0.08s
+  - Command: `pytest -q -rA tests/test_state.py` -> 4 passed in 0.12s
+  - Output captured to `evidence/gate-reject.txt`.
+- **Status:** **ALL PHASE 2 ACCEPTANCE CHECKS PASSED**

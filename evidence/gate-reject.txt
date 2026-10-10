@@ -1,0 +1,18 @@
+﻿..............                                                           [100%]
+=================================== PASSES ====================================
+=========================== short test summary info ===========================
+PASSED tests/test_gate.py::test_clean_fix_allowed
+PASSED tests/test_gate.py::test_assert_deleted
+PASSED tests/test_gate.py::test_skip_added
+PASSED tests/test_gate.py::test_xfail_added
+PASSED tests/test_gate.py::test_diff_too_large
+PASSED tests/test_gate.py::test_test_file_edited
+PASSED tests/test_gate.py::test_pytest_ini_edited
+PASSED tests/test_gate.py::test_conftest_edited
+PASSED tests/test_gate.py::test_no_prior_red_run
+PASSED tests/test_gate.py::test_timeout_prior_run_not_accepted
+PASSED tests/test_gate.py::test_node_not_green
+PASSED tests/test_gate.py::test_file_not_green
+PASSED tests/test_gate.py::test_empty_diff
+PASSED tests/test_gate.py::test_rename_touching_protected_path
+14 passed in 0.08s
