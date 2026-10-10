@@ -91,6 +91,7 @@ htmlcov/
 # Logs & Temporary Files
 # ------------------------------------------------------------------------------
 .fixloop/
+fixloop-sandbox/
 *.log
 logs/
 tmp/
