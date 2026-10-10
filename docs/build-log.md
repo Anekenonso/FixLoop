@@ -273,4 +273,28 @@ Executed automated acceptance test suite in isolated temporary copy:
   - Command: `pytest tests/test_break_matrix.py -v -rA` -> **20 passed in 70.48s** (100% pass across all 20 rows).
 - **Status:** **ALL PHASE 8 ACCEPTANCE CHECKS PASSED**
 
+---
+
+## Phase 9 — Unit Economics & cfo.ai Inputs
+
+- **Unit Economics Model (`plans/unit-economics.md`):**
+  - Synthesized measured empirical data from `evidence/experiments/summary.json` and `evidence/intervention.json`.
+  - Defined explicit classifications for all metrics:
+    - `MEASURED`: Mean model cost per run ($0.001007 USD), mean tokens (5,649), resolve rate (100%), false PR rate (0%).
+    - `SCENARIO`: Price per merged fix ($40.00, refund on unverified stop), CI overhead per run ($0.02).
+    - `UNKNOWN`: Cash runway labeled `cash unknown; model-budget runway only` (strictly obeying rule against invented cash).
+  - Derived core economic formulas:
+    - Cost per resolved fix = mean cost per run ÷ resolve rate = $0.001007 USD (at measured 1.0 resolve rate).
+    - Gross margin = 99.95% at measured baseline; 99.84% under conservative 33% resolve rate downside shock.
+  - Modeled 3 core scenarios:
+    - Scenario A: 100 fixes/month at measured resolve rate ($4,000 revenue, $2.10 COGS, 99.95% margin).
+    - Scenario B: Provider token prices doubled (99.94% margin).
+    - Scenario C: Lower-bound 33% resolve rate with 200 refunded stops ($4,000 revenue, $6.30 COGS, 99.84% margin).
+  - Runway Analysis:
+    - Model budget runway on $8.00 credit cap = **7,944 autonomous fix runs**.
+    - Full 36-trial headline matrix consumed only $0.03705 USD total.
+  - Provided cfo.ai inputs mapping for hackathon judging requirements.
+- **Status:** **ALL PHASE 9 ACCEPTANCE CHECKS PASSED**
+
+
 
