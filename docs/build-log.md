@@ -329,4 +329,26 @@ Executed automated acceptance test suite in isolated temporary copy:
     - Clean base state restored.
   - All 3 cases pass feasibility checks 100%.
 - **Pre-Registration Discipline:**
-  - `docs/replay-cases.md` must be committed to git before any live model execution on the replay cases.
+  - `docs/replay-cases.md` was committed to git before any live model execution on the replay cases (commit `bcd86c7`).
+- **Live Model Execution & Results:**
+  - **Case 01 (`pallets/flask` #4045):**
+    - Status: `passed`, attempts: 1, tokens: 7,068, cost: $0.00125 USD.
+    - Modified: `src/flask/blueprints.py` (+2 / -1).
+    - Oracle resolved: `True`, False PR: `False`. Gate check: 0 rejects.
+    - Receipt: [`evidence/replay/receipt-case-01-flask.md`](file:///c:/Users/USER/Documents/Software%20Development/AI%20SaaS/FixLoop/evidence/replay/receipt-case-01-flask.md).
+  - **Case 02 (`psf/requests` #863):**
+    - Status: `passed`, attempts: 1, tokens: 16,522, cost: $0.00281 USD.
+    - Modified: `src/requests/models.py` (+4 / -2).
+    - Oracle resolved: `True`, False PR: `False`. Gate check: 0 rejects.
+    - Receipt: [`evidence/replay/receipt-case-02-requests-863.md`](file:///c:/Users/USER/Documents/Software%20Development/AI%20SaaS/FixLoop/evidence/replay/receipt-case-02-requests-863.md).
+  - **Case 03 (`pallets/flask` #4992):**
+    - Status: `passed`, attempts: 1, tokens: 6,393, cost: $0.00118 USD.
+    - Modified: `src/flask/config.py` (+3 / -3).
+    - Oracle resolved: `True`, False PR: `False`. Gate check: 0 rejects.
+    - Receipt: [`evidence/replay/receipt-case-03-flask-4992.md`](file:///c:/Users/USER/Documents/Software%20Development/AI%20SaaS/FixLoop/evidence/replay/receipt-case-03-flask-4992.md).
+  - **Summary Table (`evidence/replay/summary.md`):**
+    - Resolve rate: **3/3 (100.0%)**
+    - False PR rate: **0/3 (0.0%)**
+    - Total tokens: 29,983 tokens
+    - Total cost: $0.00525 USD
+- **Status:** **ALL WINNING LAYER CHECKS (W1, W2, W3) PASSED**

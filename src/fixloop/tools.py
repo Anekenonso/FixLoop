@@ -188,7 +188,7 @@ def edit_file(
     commit_msg = f"fixloop attempt {attempt}: {test_node}"
     
     try:
-        subprocess.run(["git", "add", "-A"], cwd=str(repo_path), check=True, capture_output=True)
+        subprocess.run(["git", "add", norm_target], cwd=str(repo_path), check=True, capture_output=True)
         subprocess.run(["git", "commit", "-m", commit_msg], cwd=str(repo_path), check=True, capture_output=True)
     except Exception:
         # Commit failure (e.g. no changes, non-git dir, or git error)

@@ -1,0 +1,35 @@
+[
+  {
+    "case_id": "case-01-flask",
+    "name": "pallets/flask (Issue 4045)",
+    "test_node": "tests/test_blueprints.py::test_dotted_name_not_allowed",
+    "status": "passed",
+    "oracle_resolved": true,
+    "false_pr": false,
+    "attempts": 1,
+    "tokens": 7068,
+    "cost_usd": 0.001249
+  },
+  {
+    "case_id": "case-02-requests-863",
+    "name": "psf/requests (Issue 863)",
+    "test_node": "tests/test_requests.py::test_allow_list_of_hooks_to_register_hook",
+    "status": "passed",
+    "oracle_resolved": true,
+    "false_pr": false,
+    "attempts": 1,
+    "tokens": 16522,
+    "cost_usd": 0.0028130000000000004
+  },
+  {
+    "case_id": "case-03-flask-4992",
+    "name": "pallets/flask (Issue 4992)",
+    "test_node": "tests/test_config.py::test_config_from_file_toml",
+    "status": "passed",
+    "oracle_resolved": true,
+    "false_pr": false,
+    "attempts": 1,
+    "tokens": 6393,
+    "cost_usd": 0.001184
+  }
+]

@@ -1,0 +1,239 @@
+{
+  "run_id": "03-1791660368-3013fb",
+  "arm": "full",
+  "issue_id": "03",
+  "issue": {
+    "title": "Allow lists in the dict values of the hooks argument",
+    "body": "When passing a list of hooks in the hooks argument (e.g. `hooks={\"response\": [f1, f2]}`) or calling `register_hook(\"response\", [f1, f2])`, requests appends the list itself rather than extending the hook list with each callback. As a result, items in the hook list are not callable."
+  },
+  "test_node": "tests/test_requests.py::test_allow_list_of_hooks_to_register_hook",
+  "repo": "C:\\Users\\USER\\Documents\\Software Development\\AI SaaS\\FixLoop\\evidence\\replay\\case-02-requests-863",
+  "base_commit": "4e2bb004f3e7d7a6ebf05121fffdc59560a66147",
+  "branch": "fixloop/03-1791660368",
+  "attempt": 1,
+  "max_attempts": 2,
+  "runs_used": 1,
+  "timeout_retry_used": false,
+  "status": "passed",
+  "flags": {
+    "gate": true,
+    "lookup": true,
+    "dry_pr": true
+  },
+  "baseline": {
+    "ok": true,
+    "exit_code": 1,
+    "tail": "F                                                                        [100%]\n================================== FAILURES ===================================\nE   assert False is True\n     +  where False = callable([<function test_allow_list_of_hooks_to_register_hook.<locals>.hook_a at 0x000001CFED2BB560>, <function test_allow_list_of_hooks_to_register_hook.<locals>.hook_b at 0x000001CFED2BB600>])\nC:\\Users\\USER\\Documents\\Software Development\\AI SaaS\\FixLoop\\evidence\\replay\\case-02-requests-863\\tests\\test_requests.py:14: assert False is True\n=========================== short test summary info ===========================\nFAILED tests/test_requests.py::test_allow_list_of_hooks_to_register_hook - as...\n1 failed in 0.08s",
+    "duration_s": 1.534,
+    "span_id": "span_base_b3a76a7a"
+  },
+  "runs": [
+    {
+      "attempt": 1,
+      "command": "pytest tests/test_requests.py::test_allow_list_of_hooks_to_register_hook",
+      "exit_code": 0,
+      "tail": ".                                                                        [100%]\n1 passed in 0.13s",
+      "span_id": "span_run_tests_53b6edbd",
+      "duration_s": 1.848
+    }
+  ],
+  "edits": [
+    {
+      "attempt": 1,
+      "path": "src/requests/models.py",
+      "ok": true,
+      "span_id": "span_edit_file_33461c02"
+    }
+  ],
+  "working": [
+    {
+      "tool": "read_issue",
+      "args": {
+        "issue_id": "issue"
+      },
+      "result": {
+        "ok": false,
+        "error": "missing_issue"
+      }
+    },
+    {
+      "tool": "read_file",
+      "args": {
+        "path": "src/requests/hooks.py",
+        "start": 1,
+        "end": 50
+      },
+      "result": {
+        "ok": false,
+        "error": "file_not_found"
+      }
+    },
+    {
+      "tool": "read_file",
+      "args": {
+        "path": "src/requests/hooks.py",
+        "start": 1,
+        "end": 50
+      },
+      "result": {
+        "ok": false,
+        "error": "file_not_found"
+      }
+    },
+    {
+      "tool": "read_file",
+      "args": {
+        "path": "src/requests/hooks.py",
+        "start": 1,
+        "end": 50
+      },
+      "result": {
+        "ok": false,
+        "error": "file_not_found"
+      }
+    },
+    {
+      "tool": "read_file",
+      "args": {
+        "path": "src/requests/hooks.py",
+        "start": 1,
+        "end": 50
+      },
+      "result": {
+        "ok": false,
+        "error": "file_not_found"
+      }
+    },
+    {
+      "tool": "read_file",
+      "args": {
+        "path": "src/requests/models.py",
+        "start": 1,
+        "end": 50
+      },
+      "result": {
+        "ok": true,
+        "lines": {
+          "1": "class Request:",
+          "2": "    def __init__(self, hooks=None):",
+          "3": "        self.hooks = {\"args\": []}",
+          "4": "        if hooks:",
+          "5": "            for k, v in hooks.items():",
+          "6": "                self.register_hook(k, v)",
+          "7": "",
+          "8": "    def register_hook(self, event, hook):",
+          "9": "        \"\"\"Properly register a hook.\"\"\"",
+          "10": "        # BUG: appends hook directly even if hook is a list",
+          "11": "        self.hooks[event].append(hook)"
+        }
+      }
+    },
+    {
+      "tool": "read_file",
+      "args": {
+        "path": "src/requests/models.py",
+        "start": 1,
+        "end": 50
+      },
+      "result": {
+        "ok": true,
+        "lines": {
+          "1": "class Request:",
+          "2": "    def __init__(self, hooks=None):",
+          "3": "        self.hooks = {\"args\": []}",
+          "4": "        if hooks:",
+          "5": "            for k, v in hooks.items():",
+          "6": "                self.register_hook(k, v)",
+          "7": "",
+          "8": "    def register_hook(self, event, hook):",
+          "9": "        \"\"\"Properly register a hook.\"\"\"",
+          "10": "        # BUG: appends hook directly even if hook is a list",
+          "11": "        self.hooks[event].append(hook)"
+        }
+      }
+    },
+    {
+      "tool": "read_file",
+      "args": {
+        "path": "src/requests/models.py",
+        "start": 1,
+        "end": 50
+      },
+      "result": {
+        "ok": true,
+        "lines": {
+          "1": "class Request:",
+          "2": "    def __init__(self, hooks=None):",
+          "3": "        self.hooks = {\"args\": []}",
+          "4": "        if hooks:",
+          "5": "            for k, v in hooks.items():",
+          "6": "                self.register_hook(k, v)",
+          "7": "",
+          "8": "    def register_hook(self, event, hook):",
+          "9": "        \"\"\"Properly register a hook.\"\"\"",
+          "10": "        # BUG: appends hook directly even if hook is a list",
+          "11": "        self.hooks[event].append(hook)"
+        }
+      }
+    },
+    {
+      "tool": "edit_file",
+      "args": {
+        "path": "src/requests/models.py",
+        "old": "        # BUG: appends hook directly even if hook is a list\n        self.hooks[event].append(hook)",
+        "new": "        if isinstance(hook, list):\n            self.hooks[event].extend(hook)\n        else:\n            self.hooks[event].append(hook)"
+      },
+      "result": {
+        "ok": true
+      }
+    },
+    {
+      "tool": "run_tests",
+      "args": {
+        "node_id": "tests/test_requests.py::test_allow_list_of_hooks_to_register_hook"
+      },
+      "result": {
+        "ok": true,
+        "exit_code": 0,
+        "tail": ".                                                                        [100%]\n1 passed in 0.13s",
+        "duration_s": 1.848
+      }
+    },
+    {
+      "tool": "open_pr",
+      "args": {
+        "title": "Fix register_hook to extend list when hook argument is a list",
+        "body": "## Problem\n\nWhen passing a list of hooks via `hooks={\"response\": [f1, f2]}` or calling `register_hook(\"response\", [f1, f2])`, the entire list was being appended as a single item rather than each callable being added individually. This caused items in the hook list to be non-callable (the list itself was the item).\n\n## Fix\n\nIn `src/requests/models.py`, updated `register_hook` to check if the `hook` argument is a list. If it is, use `extend` to add each callable individually; otherwise, use `append` as before.\n\n```python\ndef register_hook(self, event, hook):\n    \"\"\"Properly register a hook.\"\"\"\n    if isinstance(hook, list):\n        self.hooks[event].extend(hook)\n    else:\n        self.hooks[event].append(hook)\n```\n\n## Testing\n\nThe fix passes `tests/test_requests.py::test_allow_list_of_hooks_to_register_hook`."
+      },
+      "result": {
+        "ok": true,
+        "allowed": true,
+        "pr": "dry_run",
+        "branch": "fixloop/03-1791660368"
+      }
+    }
+  ],
+  "hint": null,
+  "steps": 11,
+  "rejections": 0,
+  "gate_rejects": 0,
+  "gate": null,
+  "pending": {
+    "mismatch": false,
+    "timeout_retry": false,
+    "green": true,
+    "lookup_done": false
+  },
+  "hypotheses_rejected": [],
+  "pr_url": null,
+  "cost_usd": 0.0028130000000000004,
+  "tokens": 16522,
+  "last_span_id": "span_open_pr_a1084d4b",
+  "edit_root": "src/",
+  "oracle": {
+    "resolved": true,
+    "node_exit": 0,
+    "file_exit": 0
+  },
+  "false_pr": false
+}
