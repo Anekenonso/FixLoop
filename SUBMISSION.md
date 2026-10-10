@@ -46,4 +46,6 @@ Every claim made during neatHack is directly verifiable by saved evidence files 
 | **Entire Development Provenance** | [`evidence/entire/`](evidence/entire/), Git commit trailers | Unrewritten build trajectory tracking every phase inside the hackathon window. |
 | **cfo.ai Financial Plan** | [`plans/unit-economics.md`](plans/unit-economics.md) | Outcome-based SaaS pricing ($40/fix), 99.95% gross margin, 7,944 runs runway. |
 | **Live Demonstration PR** | [`evidence/final-pr.json`](evidence/final-pr.json), [PR #1](https://github.com/Anekenonso/fixloop-sandbox/pull/1) | Live pull request opened against public sandbox repo with Trust Receipt embedded. |
+| **AWS Compute Architecture** | [`plans/unit-economics.md`](plans/unit-economics.md), [`README.md`](README.md) | Ephemeral microVM test runner modeled on AWS Lambda / ECS Fargate (`us-east-1`). |
+| **Crustdata Intelligence** | [`src/fixloop/enrichment.py`](src/fixloop/enrichment.py), [`tests/test_enrichment.py`](tests/test_enrichment.py) | Issue author profile enrichment & enterprise addressable market analysis. |
 | **Offline Test Suite** | [`tests/`](tests/) | 86 unit tests passing with zero external network (`pytest -q` exits 0). |

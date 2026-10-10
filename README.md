@@ -169,6 +169,16 @@ FixLoop maps directly to the hackathon's core agent capabilities:
 - **Implementation:** Comprehensive unit economics model in [`plans/unit-economics.md`](plans/unit-economics.md) utilizing measured token counts.
 - **Result:** Establishes that FixLoop costs **$0.001007 USD** per run, enabling an outcome-based pricing model of **$40 per merged fix** with **99.95% gross margin** and a runway of **7,944 runs** on an $8 budget cap.
 
+### 4. AWS Compute (Isolated Ephemeral Execution)
+- **Role:** Cloud infrastructure and sandbox execution environment.
+- **Implementation:** Ephemeral test runner model designed for AWS ECS Fargate / Lambda (`us-east-1`) to isolate untrusted user code execution during automated pytest cycles.
+- **Result:** Safeguards host infrastructure while maintaining a tiny per-run overhead ($0.020 USD), fully compatible with the hackathon's $25 AWS allowance.
+
+### 5. Crustdata (Contributor Intelligence & Enterprise Market Sizing)
+- **Role:** Company and contributor enrichment.
+- **Implementation:** Integrated module in [`src/fixloop/enrichment.py`](src/fixloop/enrichment.py) leveraging Crustdata APIs to enrich issue authors and size high-value enterprise engineering teams.
+- **Result:** Enables enterprise ticket prioritization and grounds the SaaS customer acquisition assumptions modeled in [`plans/unit-economics.md`](plans/unit-economics.md).
+
 ---
 
 ## Real vs Simulated (Authenticity Matrix)

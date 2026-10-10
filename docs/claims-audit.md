@@ -48,6 +48,8 @@
 | **Neatlogs** | 14-field span telemetry & trace lookup memory across attempts | [`evidence/trace-links.md`](../evidence/trace-links.md), [`evidence/live/spans-*.jsonl`](../evidence/live/) |
 | **Entire** | Complete build trajectory tracking and checkpoint git trailers | [`evidence/entire/`](../evidence/entire/), Git commit history |
 | **cfo.ai** | Empirical unit economics model, gross margin analysis (99.95%), and downside shock sensitivity | [`plans/unit-economics.md`](../plans/unit-economics.md) |
+| **AWS Compute** | Ephemeral microVM test runner modeled on AWS Lambda / ECS Fargate (`us-east-1`) with $0.020 overhead | [`plans/unit-economics.md`](../plans/unit-economics.md), [`README.md`](../README.md) |
+| **Crustdata** | Contributor enrichment and enterprise engineering market sizing via 5,000 credit allocation | [`src/fixloop/enrichment.py`](../src/fixloop/enrichment.py), [`tests/test_enrichment.py`](../tests/test_enrichment.py) |
 
 ---
 

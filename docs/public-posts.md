@@ -66,6 +66,23 @@
 
 ---
 
+## Post 4b: Live Demonstration Pull Request on GitHub
+- **Status:** Ready to post
+- **Suggested Timing:** Pre-submission window (12 Oct)
+- **Draft Copy:**
+  > Just executed FixLoop live on GitHub against a public fixture repository.
+  > 
+  > The model resolved the swallowed exception in `cache.py`, proved exit code 0 via the code gatekeeper, and opened a real PR on GitHub embedded with a deterministic Trust Receipt.
+  > 
+  > Live PR: https://github.com/Anekenonso/fixloop-sandbox/pull/1
+  > 0 false PRs on gated runs. #neatHack
+- **Evidence Attached:**
+  - Live PR: [https://github.com/Anekenonso/fixloop-sandbox/pull/1](https://github.com/Anekenonso/fixloop-sandbox/pull/1)
+  - Run Evidence: [`evidence/final-pr.json`](../evidence/final-pr.json)
+  - Trust Receipt: [`evidence/receipt-final-pr.md`](../evidence/receipt-final-pr.md)
+
+---
+
 ## Post 5: Final Demo & Submission Quote-Post
 - **Status:** Scheduled for official submission window (12 Oct, 7:00–11:55 PM IST)
 - **Official Submission Quote-Post Draft:**
