@@ -71,3 +71,30 @@ Executed automated acceptance test suite in isolated temporary copy:
   - Command: `pytest -q -rA tests/test_state.py` -> 4 passed in 0.12s
   - Output captured to `evidence/gate-reject.txt`.
 - **Status:** **ALL PHASE 2 ACCEPTANCE CHECKS PASSED**
+
+---
+
+## Phase 3 — `tools.py` & Security Invariant Tests
+
+- **Tool Implementations (`src/fixloop/tools.py`):**
+  - `read_issue`: Parses issue markdown files. Extracts `# title`, body, and `TEST_NODE: tests/...::...`. Missing issue returns `missing_issue`; missing/malformed `TEST_NODE` returns `malformed_issue`.
+  - `read_file`: Sandboxed reading of numbered lines (1-indexed inclusive, max 200 lines). Enforces `target.resolve().relative_to(repo)` to strictly prevent path traversal (`../`), absolute paths, and external symlink escapes (`path_outside_repo`).
+  - `edit_file`: Exact substring replacement confined to `edit_root` (default `src/`). Rejects protected paths like `tests/` or `pytest.ini` (`protected_path`). Enforces exact-occurrence check (`count(old) == 1`, returning `mismatch` and leaving file untouched otherwise). Rejects additions containing `pytest.skip`, `importorskip`, `xfail`, `skipif`, `mark.skip` (`test_skipped`). Automatically commits valid changes as `fixloop attempt <attempt>: <test_node>`.
+  - `run_tests`: Validates `node_id == state['test_node']` and matches strict regex `^tests/[A-Za-z0-9_/]+\.py::[A-Za-z0-9_]+$` to prevent flag injection (`-x --pdb`) or arbitrary execution (`invalid_node_id`). Calls `run_tests_raw`.
+  - `run_tests_raw`: Sanitized subprocess execution. Passes only `PATH`, `HOME=<tmp>`, `USERPROFILE=<tmp>`, `PYTHONDONTWRITEBYTECODE=1`, `LANG=C.UTF-8` (+ Windows OS runtime variables `SYSTEMROOT`/`SystemDrive`). Guarantees environment secrets (e.g. `FIXLOOP_PLANTED_SECRET`, API keys) are strictly absent. Exact argv format: `[sys.executable, "-m", "pytest", node_id, "-q", "--tb=line"]`. Enforces timeout (default 60s) returning exit code 124.
+  - `trace_lookup`: Reads `evidence/spans.jsonl` locally without any network or external HTTP calls. Respects `--no-trace-lookup` (`flags['lookup'] = False`) returning `{"disabled": True}`.
+  - `open_pr`: Enforces title <= 120 chars, body <= 4000 chars. Invokes gate verification prior to any PR actions. Under dry-run mode (default), saves body to `evidence/pr-body-<run_id>.md`.
+- **Acceptance Verification (`tests/test_tools.py`):**
+  - Command: `pytest tests/test_tools.py -v -rA` -> 12 passed in 74.34s
+  - Command: `pytest -q` (full test suite) -> 31 passed in 62.49s
+  - Verified Break-Matrix rows:
+    - Row 1: Issue file without `TEST_NODE` -> `malformed_issue`
+    - Row 2: `read_file` with `../`, absolute path, symlink out of repo -> `path_outside_repo`
+    - Row 3: `edit_file` with `old` absent or duplicate -> `mismatch`, file hash unchanged
+    - Row 4: `edit_file` path `tests/...` or `pytest.ini` -> `protected_path`, file hash unchanged
+    - Row 5: `edit_file` new text with `pytest.skip` / `xfail` -> `test_skipped`, file hash unchanged
+    - Row 12: `run_tests` with another node id or `-x --pdb` -> `invalid_node_id`
+    - Row 16: Planted secret in env -> strictly invisible inside pytest subprocess (asserted in test)
+    - Row 17: Test hangs (timeout) -> exit code 124
+    - Exact argv assertion: verified `[sys.executable, "-m", "pytest", node_id, "-q", "--tb=line"]` via monkeypatched `subprocess.run`.
+- **Status:** **ALL PHASE 3 ACCEPTANCE CHECKS PASSED**
