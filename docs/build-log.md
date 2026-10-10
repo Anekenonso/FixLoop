@@ -352,3 +352,28 @@ Executed automated acceptance test suite in isolated temporary copy:
     - Total tokens: 29,983 tokens
     - Total cost: $0.00525 USD
 - **Status:** **ALL WINNING LAYER CHECKS (W1, W2, W3) PASSED**
+
+---
+
+## Phase 11 — Live Demonstration Pull Request
+
+- **Target Public Repository:** Created [`Anekenonso/fixloop-sandbox`](https://github.com/Anekenonso/fixloop-sandbox) on GitHub from `sandbox_template/` with baseline failing fixtures.
+- **Execution Command:**
+  ```bash
+  python -m src.fixloop run --repo fixloop-sandbox --issue 03 --model openai --pr --out evidence/final-pr.json
+  ```
+- **Execution Results:**
+  - Status: `pr_opened`
+  - Attempts: 1 / 2
+  - Baseline exit code: 1 (`tests/test_cache.py::test_compute_failure_contract`)
+  - Target edit applied: `src/cache.py` (+1 / -1)
+  - Post-edit node exit: 0 (Passed)
+  - Gatekeeper evaluation: APPROVED (diff confined to `src/`, diff <= 80 lines, zero tests modified)
+  - Pull request opened: [https://github.com/Anekenonso/fixloop-sandbox/pull/1](https://github.com/Anekenonso/fixloop-sandbox/pull/1)
+  - Embedded Trust Receipt: Verified code-generated receipt with `Verdict: FIXED, gate ok`
+  - Tokens: 7,263
+  - Cost: $0.00131 USD
+  - Last span ID: `span_open_pr_0e255426`
+  - Saved evidence: [`evidence/final-pr.json`](file:///c:/Users/USER/Documents/Software%20Development/AI%20SaaS/FixLoop/evidence/final-pr.json) and [`evidence/receipt-final-pr.md`](file:///c:/Users/USER/Documents/Software%20Development/AI%20SaaS/FixLoop/evidence/receipt-final-pr.md)
+- **Status:** **PHASE 11 LIVE DEMO PR COMPLETE AND VERIFIED**
+

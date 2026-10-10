@@ -10,6 +10,8 @@
 - **Project Name:** FixLoop
 - **One-Sentence Thesis:** *"The model proposes. Code decides. A recorded stop beats a fabricated PR."*
 - **Repository URL:** https://github.com/Anekenonso/FixLoop
+- **Live Demo PR URL:** https://github.com/Anekenonso/fixloop-sandbox/pull/1
+- **Live Demo Fixture Repository:** https://github.com/Anekenonso/fixloop-sandbox
 - **Demo Video URL:** `<VIDEO_URL>` (3-minute demo recorded per [`docs/demo-script.md`](docs/demo-script.md))
 - **Build-in-Public Posts Log:** [`docs/public-posts.md`](docs/public-posts.md)
 
@@ -43,4 +45,5 @@ Every claim made during neatHack is directly verifiable by saved evidence files 
 | **Neatlogs Telemetry** | [`evidence/trace-links.md`](evidence/trace-links.md), [`src/fixloop/tracing.py`](src/fixloop/tracing.py) | 14-field span telemetry powering `trace_lookup` causal recovery across attempts. |
 | **Entire Development Provenance** | [`evidence/entire/`](evidence/entire/), Git commit trailers | Unrewritten build trajectory tracking every phase inside the hackathon window. |
 | **cfo.ai Financial Plan** | [`plans/unit-economics.md`](plans/unit-economics.md) | Outcome-based SaaS pricing ($40/fix), 99.95% gross margin, 7,944 runs runway. |
+| **Live Demonstration PR** | [`evidence/final-pr.json`](evidence/final-pr.json), [PR #1](https://github.com/Anekenonso/fixloop-sandbox/pull/1) | Live pull request opened against public sandbox repo with Trust Receipt embedded. |
 | **Offline Test Suite** | [`tests/`](tests/) | 86 unit tests passing with zero external network (`pytest -q` exits 0). |

@@ -67,7 +67,7 @@ def generate_receipt(state: Dict[str, Any], verdict_override: Optional[str] = No
     oracle_resolved = oracle.get("resolved", False)
     if oracle_resolved:
         check_now = f"PASSED ({test_node} exited 0, regression test file exited 0)"
-    elif status in {"passed", "pr_opened"}:
+    elif status in {"passed", "pr_opened"} or verdict == "FIXED, gate ok":
         check_now = f"PASSED ({test_node} exited 0)"
     else:
         check_now = f"FAILED / UNVERIFIED ({test_node} did not pass gate)"

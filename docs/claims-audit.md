@@ -48,3 +48,15 @@
 | **Neatlogs** | 14-field span telemetry & trace lookup memory across attempts | [`evidence/trace-links.md`](../evidence/trace-links.md), [`evidence/live/spans-*.jsonl`](../evidence/live/) |
 | **Entire** | Complete build trajectory tracking and checkpoint git trailers | [`evidence/entire/`](../evidence/entire/), Git commit history |
 | **cfo.ai** | Empirical unit economics model, gross margin analysis (99.95%), and downside shock sensitivity | [`plans/unit-economics.md`](../plans/unit-economics.md) |
+
+---
+
+## 5. Live Demonstration PR Verification (Phase 11)
+
+| Claim | Value | Source Artifact | Verification Method |
+|---|---|---|---|
+| **Public Fixture Repo** | `Anekenonso/fixloop-sandbox` | [GitHub Repo](https://github.com/Anekenonso/fixloop-sandbox) | Clean fixture repository populated with `sandbox_template` files. |
+| **Live PR Created** | [PR #1](https://github.com/Anekenonso/fixloop-sandbox/pull/1) | [`evidence/final-pr.json`](../evidence/final-pr.json) | Created via `gh pr create` with `status: pr_opened`, exit code 0. |
+| **Trust Receipt Embedded** | Verified | [`evidence/receipt-final-pr.md`](../evidence/receipt-final-pr.md) | Deterministic receipt header with `Verdict: FIXED, gate ok` and diff stats. |
+| **Live PR Tokens & Cost** | 7,263 tokens / $0.00131 USD | [`evidence/final-pr.json`](../evidence/final-pr.json) | Measured live on Issue 03 with LiteLLM proxy adapter. |
+

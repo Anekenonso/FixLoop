@@ -29,7 +29,7 @@ fixloop run --issue 03 --model openai
 | **psf/requests (Issue 863)** | Real Historical (Apache-2) | 1 trial | **100.0%** (Resolved) | **0.0%** (Gate OK) | $0.002810 USD | [`evidence/replay/receipt-case-02-requests-863.md`](evidence/replay/receipt-case-02-requests-863.md) |
 | **pallets/flask (Issue 4992)** | Real Historical (BSD-3) | 1 trial | **100.0%** (Resolved) | **0.0%** (Gate OK) | $0.001180 USD | [`evidence/replay/receipt-case-03-flask-4992.md`](evidence/replay/receipt-case-03-flask-4992.md) |
 
-**Quick Links:** [Full Architecture](docs/architecture.md) · [Claims Audit](docs/claims-audit.md) · [3-Min Demo Script](docs/demo-script.md) · [Break Matrix (20/20)](docs/break-matrix.md) · [Unit Economics (cfo.ai)](plans/unit-economics.md) · [Roadmap](ROADMAP.md)
+**Quick Links:** [Live Demo PR #1](https://github.com/Anekenonso/fixloop-sandbox/pull/1) · [Full Architecture](docs/architecture.md) · [Claims Audit](docs/claims-audit.md) · [3-Min Demo Script](docs/demo-script.md) · [Break Matrix (20/20)](docs/break-matrix.md) · [Unit Economics (cfo.ai)](plans/unit-economics.md) · [Roadmap](ROADMAP.md)
 
 ---
 
@@ -130,6 +130,7 @@ All empirical claims are backed by raw artifacts in [`evidence/`](evidence/):
   - [`evidence/removal.json`](evidence/removal.json): Gate active, trace lookup disabled.
   - [`evidence/nogate.json`](evidence/nogate.json): Ungated model auto-proposal.
 - **Three Real Bug Replays (`W2`):** 3 historical SWE-bench Lite bugs from `pallets/flask` and `psf/requests`. Pre-registered in [`docs/replay-cases.md`](docs/replay-cases.md) and executed live. Documented in [`evidence/replay/summary.md`](evidence/replay/summary.md).
+- **Live Demo Pull Request (Phase 11):** Real pull request opened by FixLoop on GitHub against [`fixloop-sandbox`](https://github.com/Anekenonso/fixloop-sandbox) on Issue 03 with live Trust Receipt. Verified in [`evidence/final-pr.json`](evidence/final-pr.json) and [`evidence/receipt-final-pr.md`](evidence/receipt-final-pr.md). View on GitHub: [PR #1](https://github.com/Anekenonso/fixloop-sandbox/pull/1).
 - **20-Row Break Matrix:** 20 adversarial attack scenarios executed against FixLoop's defense layers in [`docs/break-matrix.md`](docs/break-matrix.md). Result: **20/20 passed**.
 
 ---

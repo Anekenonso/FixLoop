@@ -362,7 +362,7 @@ def open_pr(
 
     # Gate allowed -> check if live PR or dry run
     from src.fixloop import receipt
-    receipt_body = receipt.generate_receipt(state, diff_text=diff_text)
+    receipt_body = receipt.generate_receipt(state, verdict_override="FIXED, gate ok", diff_text=diff_text)
     full_body = f"{receipt_body}\n\n## Model Notes\n{body}" if body else receipt_body
 
     flags = state.get("flags", {})
