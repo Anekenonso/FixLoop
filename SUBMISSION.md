@@ -12,8 +12,8 @@
 - **Repository URL:** https://github.com/Anekenonso/FixLoop
 - **Live Demo PR URL:** https://github.com/Anekenonso/fixloop-sandbox/pull/1
 - **Live Demo Fixture Repository:** https://github.com/Anekenonso/fixloop-sandbox
-- **Demo Video URL:** `<VIDEO_URL>` (3-minute demo recorded per [`docs/demo-script.md`](docs/demo-script.md))
-- **Build-in-Public Posts Log:** [`docs/public-posts.md`](docs/public-posts.md)
+- **Demo Video URL:** `<VIDEO_URL>` (3-minute walkthrough video)
+- **Build-in-Public Updates:** Published live on X tagged `#neatHack`
 
 ---
 

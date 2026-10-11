@@ -302,6 +302,8 @@ def run(cfg: Config) -> int:
                 "dry_pr": cfg.dry_pr,
             },
             "edit_root": cfg.edit_root,
+            "project_id": os.environ.get("NEATLOGS_PROJECT_ID", "265a1b5d-2171-404c-ad4a-102c70bed8b7"),
+            "trace_id": tracing.get_current_trace_id(),
         })
         state.save_state(s, str(state_path))
 

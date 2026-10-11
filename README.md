@@ -32,7 +32,7 @@ fixloop run --issue 03 --model openai
 | **pallets/flask (Issue 4992)** | Real Historical (BSD-3) | 1 trial | **100.0%** (Resolved) | **0.0%** (Gate OK) | $0.001180 USD | [`evidence/replay/receipt-case-03-flask-4992.md`](evidence/replay/receipt-case-03-flask-4992.md) |
 | **Live GitHub PR (fixloop-sandbox)** | Public Repo Fixture | 1 live PR | **100.0%** (Opened) | **0.0%** (Gate OK) | $0.001310 USD | [`evidence/receipt-final-pr.md`](evidence/receipt-final-pr.md) · [PR #1](https://github.com/Anekenonso/fixloop-sandbox/pull/1) |
 
-**Quick Links:** [Live Demo PR #1](https://github.com/Anekenonso/fixloop-sandbox/pull/1) · [3-Min Demo Script](docs/demo-script.md) · [Full Architecture](docs/architecture.md) · [Claims Audit](docs/claims-audit.md) · [Break Matrix (20/20)](docs/break-matrix.md) · [Unit Economics (cfo.ai)](plans/unit-economics.md) · [Roadmap](ROADMAP.md)
+**Quick Links:** [Live Demo PR #1](https://github.com/Anekenonso/fixloop-sandbox/pull/1) · [Full Architecture](docs/architecture.md) · [Claims Audit](docs/claims-audit.md) · [Break Matrix (20/20)](docs/break-matrix.md) · [Unit Economics (cfo.ai)](plans/unit-economics.md) · [Roadmap](ROADMAP.md)
 
 ---
 

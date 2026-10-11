@@ -1,0 +1,53 @@
+{
+  "format_version": 1,
+  "provider": "entire-graph",
+  "provider_version": "v0.4.0",
+  "repo_root": "C:\\Users\\USER\\Documents\\Software Development\\AI SaaS\\FixLoop",
+  "commit": "3cf95785bba8a96c51db0756e650b6d293474641",
+  "tree": "a4f01d8c8638cb09cf5e7e8101053b3549dc573a",
+  "profile": "full",
+  "index_cache_hit": false,
+  "index_latency_ms": 64781,
+  "counts": {
+    "files": 187,
+    "parsed_files": 187,
+    "symbols": 3685,
+    "relations": 7523,
+    "partial_failures": 0,
+    "completeness_level": "ok"
+  },
+  "warnings": [],
+  "partial_failures": [],
+  "completeness": {
+    "languages": {
+      "Git Ignore": { "files": 6, "symbols": 6 },
+      "INI": { "files": 5, "symbols": 5 },
+      "JSON": { "files": 59, "symbols": 3100 },
+      "Markdown": { "files": 72, "symbols": 360 },
+      "Python": { "files": 42, "symbols": 187 },
+      "TOML": { "files": 1, "symbols": 16 },
+      "TypeScript": { "files": 2, "symbols": 11 }
+    },
+    "relations": {
+      "ASYNC_CALLS": 1,
+      "CALLS": 369,
+      "CONFIGURES": 3116,
+      "CONSTRUCTS": 10,
+      "CONTAINS": 30,
+      "DATA_FLOWS": 18,
+      "DEFINES": 3685,
+      "EXTENDS": 2,
+      "FILE_CHANGES_WITH": 14,
+      "HANDLES_ROUTE": 2,
+      "HANDLES_TOOL": 1,
+      "IMPORTS": 224,
+      "INHERITS": 2,
+      "LISTENS_ON": 4,
+      "PARAM_TYPE": 3,
+      "RETURNS_TYPE": 4,
+      "SIMILAR_TO": 25,
+      "TESTS": 6,
+      "USES_TYPE": 7
+    }
+  }
+}
