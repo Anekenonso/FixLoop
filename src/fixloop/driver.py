@@ -209,7 +209,10 @@ def run(cfg: Config) -> int:
         return 2
 
     # Initialize observability tracing (Neatlogs)
-    tracing.init_tracing(workflow_name=f"fixloop-{cfg.arm}")
+    tracing.init_tracing(
+        workflow_name=f"fixloop-{cfg.arm}",
+        input_value=f"FixLoop [{cfg.arm}] Issue {cfg.issue}: {cfg.model}"
+    )
 
     try:
         # Check Break Matrix Row 20: --model fake with headline --out
@@ -238,6 +241,9 @@ def run(cfg: Config) -> int:
             issue_file=cfg.issue_file,
             test_override=cfg.test
         )
+        if issue_res.get("ok"):
+            prob = issue_res.get("issue", {}).get("problem_statement", "")
+            tracing.set_trace_input(f"Issue {cfg.issue}: {prob[:120] if prob else cfg.issue}")
         run_id = f"{cfg.issue}-{int(time.time())}-{uuid.uuid4().hex[:6]}"
 
 
@@ -604,5 +610,6 @@ def run(cfg: Config) -> int:
             return 1
 
     finally:
-        tracing.shutdown_tracing()
+        out_val = f"Status: {s.get('status', 'halted')} | Gate: {s.get('gate_verdict', 'none')}" if 's' in locals() and isinstance(s, dict) else "Halted before execution"
+        tracing.shutdown_tracing(output_value=out_val)
         release_lock(lock)

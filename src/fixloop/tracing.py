@@ -14,7 +14,7 @@ _CURRENT_TRACER = None
 _CURRENT_ROOT_SPAN = None
 _CURRENT_TRACE_ID = None
 
-def init_tracing(workflow_name: str = "fixloop-full") -> bool:
+def init_tracing(workflow_name: str = "fixloop-full", input_value: Optional[str] = None) -> bool:
     """Initialize Neatlogs SDK if API key is present.
     
     Gracefully falls back if NEATLOGS_API_KEY is missing so that local
@@ -42,6 +42,8 @@ def init_tracing(workflow_name: str = "fixloop-full") -> bool:
             from neatlogs._wrap_utils import get_internal_tracer
             _CURRENT_TRACER = get_internal_tracer("fixloop")
             _CURRENT_ROOT_SPAN = _CURRENT_TRACER.start_span(workflow_name)
+            if input_value:
+                _CURRENT_ROOT_SPAN.set_attribute("input.value", str(input_value))
             ctx = _CURRENT_ROOT_SPAN.get_span_context()
             if ctx.is_valid:
                 _CURRENT_TRACE_ID = format(ctx.trace_id, "032x")
@@ -55,6 +57,24 @@ def init_tracing(workflow_name: str = "fixloop-full") -> bool:
         _CURRENT_ROOT_SPAN = None
         _CURRENT_TRACE_ID = None
         return False
+
+def set_trace_input(input_text: str) -> None:
+    """Set the root trace input value for the Neatlogs dashboard."""
+    global _CURRENT_ROOT_SPAN
+    if _CURRENT_ROOT_SPAN and input_text:
+        try:
+            _CURRENT_ROOT_SPAN.set_attribute("input.value", str(input_text))
+        except Exception:
+            pass
+
+def set_trace_output(output_text: str) -> None:
+    """Set the root trace output value for the Neatlogs dashboard."""
+    global _CURRENT_ROOT_SPAN
+    if _CURRENT_ROOT_SPAN and output_text:
+        try:
+            _CURRENT_ROOT_SPAN.set_attribute("output.value", str(output_text))
+        except Exception:
+            pass
 
 def get_current_trace_id() -> Optional[str]:
     """Return the active 32-character hex Neatlogs trace ID if initialized."""
@@ -70,12 +90,14 @@ def flush_tracing() -> None:
         except Exception:
             pass
 
-def shutdown_tracing() -> None:
+def shutdown_tracing(output_value: Optional[str] = None) -> None:
     """Flush and shut down Neatlogs SDK before process exit."""
     global _NEATLOGS_INITIALIZED, _CURRENT_ROOT_SPAN, _CURRENT_TRACER, _CURRENT_TRACE_ID
     if _NEATLOGS_INITIALIZED:
         try:
             if _CURRENT_ROOT_SPAN:
+                if output_value:
+                    _CURRENT_ROOT_SPAN.set_attribute("output.value", str(output_value))
                 _CURRENT_ROOT_SPAN.end()
                 _CURRENT_ROOT_SPAN = None
             neatlogs.flush()
